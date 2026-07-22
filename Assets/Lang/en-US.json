@@ -2,21 +2,29 @@
   "AdvancedInserterBlock": {
     "Inserter": "Advanced Inserter",
     "FluidInserter": "Advanced Fluid Inserter",
-    "DescriptionInserter": "On an electric pulse, pulls items from the rear container into the front one. Sample slots can filter item types.\nWith no front container, items are ejected.",
-    "DescriptionFluidInserter": "On an electric pulse, moves roughly one bucket of fluid from the rear tank to the front tank.\nA sample fluid can filter which liquids are moved."
+    "DescriptionInserter": "On an electric pulse, pulls items from the rear container into the front one.\nPlace samples in filter slots and use allow-list or deny-list; an empty list filters nothing.\nWith no front container, items are ejected.",
+    "DescriptionFluidInserter": "On an electric pulse, moves roughly one bucket of fluid from the rear tank to the front tank.\nPlace sample fluids and use allow-list or deny-list; an empty list filters nothing."
   },
   "ContentWidgets": {
     "AdvancedInserterWidget": {
       "1": "Advanced Inserter",
       "2": "Inventory",
       "3": "Input: {0}",
-      "4": "Output: {0}"
+      "4": "Output: {0}",
+      "5": "Filter",
+      "6": "Allow list",
+      "7": "Deny list",
+      "8": "Channels"
     },
     "AdvancedFluidInserterWidget": {
       "1": "Advanced Fluid Inserter",
       "2": "Inventory",
       "3": "Input: {0}",
-      "4": "Output: {0}"
+      "4": "Output: {0}",
+      "5": "Filter",
+      "6": "Allow list",
+      "7": "Deny list",
+      "8": "Channels"
     }
   },
   "IECraftingRecipes": {

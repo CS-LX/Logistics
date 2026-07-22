@@ -1,6 +1,7 @@
 using Engine;
 using Engine.Graphics;
 using Game;
+using Logistics.Filtering;
 using SCIENEW;
 using System.Xml.Linq;
 
@@ -8,9 +9,10 @@ namespace Logistics {
     public class AdvancedFluidInserterWidget : CanvasWidget {
         public ComponentAdvancedFluidInserter m_component;
         public GridPanelWidget m_inventoryGrid;
-        public TankWidget m_fluidTank;
+        public GridPanelWidget m_fluidTankGrid;
         public ButtonWidget m_inMinusButton;
         public ButtonWidget m_inPlusButton;
+        public ButtonWidget m_filterModeButton;
         protected readonly ButtonWidget m_outPlusButton;
         protected readonly ButtonWidget m_outMinusButton;
 
@@ -19,11 +21,23 @@ namespace Logistics {
             XElement node = ContentManager.Get<XElement>("Widgets/AdvancedFluidInserterWidget");
             LoadContents(this, node);
             m_inventoryGrid = Children.Find<GridPanelWidget>("InventoryGrid");
-            m_fluidTank = Children.Find<TankWidget>("FluidTank");
+            m_fluidTankGrid = Children.Find<GridPanelWidget>("FluidTankGrid");
             m_inMinusButton = Children.Find<ButtonWidget>("InMinusButton");
             m_inPlusButton = Children.Find<ButtonWidget>("InPlusButton");
             m_outMinusButton = Children.Find<ButtonWidget>("OutMinusButton");
             m_outPlusButton = Children.Find<ButtonWidget>("OutPlusButton");
+            m_filterModeButton = Children.Find<ButtonWidget>("FilterModeButton");
+            int tankIndex = 0;
+            for (int i = 0; i < m_fluidTankGrid.RowsCount; i++) {
+                for (int j = 0; j < m_fluidTankGrid.ColumnsCount; j++) {
+                    var tankWidget = new TankWidget {
+                        Size = new Vector2(96f, 96f)
+                    };
+                    tankWidget.AssignTank(component, tankIndex++);
+                    m_fluidTankGrid.Children.Add(tankWidget);
+                    m_fluidTankGrid.SetWidgetCell(tankWidget, new Point2(j, i));
+                }
+            }
             int num = 10;
             for (int k = 0; k < m_inventoryGrid.RowsCount; k++) {
                 for (int l = 0; l < m_inventoryGrid.ColumnsCount; l++) {
@@ -33,7 +47,6 @@ namespace Logistics {
                     m_inventoryGrid.SetWidgetCell(inventorySlotWidget2, new Point2(l, k));
                 }
             }
-            m_fluidTank.AssignTank(component, 0);
         }
 
         public override void Update() {
@@ -41,10 +54,20 @@ namespace Logistics {
                 ParentWidget.Children.Remove(this);
                 return;
             }
-            Children.Find<LabelWidget>("InCountText").TextAnchor = TextAnchor.HorizontalCenter | TextAnchor.VerticalCenter;
-            Children.Find<LabelWidget>("OutCountText").TextAnchor = TextAnchor.HorizontalCenter | TextAnchor.VerticalCenter;
-            Children.Find<LabelWidget>("InCountText").Text = string.Format(LanguageControl.GetContentWidgets("AdvancedFluidInserterWidget", 3), m_component.m_inIndex.ToString());
-            Children.Find<LabelWidget>("OutCountText").Text = string.Format(LanguageControl.GetContentWidgets("AdvancedFluidInserterWidget", 4), m_component.m_outIndex.ToString());
+            LabelWidget inCount = Children.Find<LabelWidget>("InCountText");
+            LabelWidget outCount = Children.Find<LabelWidget>("OutCountText");
+            inCount.TextAnchor = TextAnchor.HorizontalCenter | TextAnchor.VerticalCenter;
+            outCount.TextAnchor = TextAnchor.HorizontalCenter | TextAnchor.VerticalCenter;
+            inCount.Text = string.Format(LanguageControl.GetContentWidgets("AdvancedFluidInserterWidget", 3), m_component.m_inIndex.ToString());
+            outCount.Text = string.Format(LanguageControl.GetContentWidgets("AdvancedFluidInserterWidget", 4), m_component.m_outIndex.ToString());
+            m_filterModeButton.Text = m_component.m_filterMode == FilterMode.Allow
+                ? LanguageControl.GetContentWidgets("AdvancedFluidInserterWidget", 6)
+                : LanguageControl.GetContentWidgets("AdvancedFluidInserterWidget", 7);
+            if (m_filterModeButton.IsClicked) {
+                m_component.m_filterMode = m_component.m_filterMode == FilterMode.Allow
+                    ? FilterMode.Deny
+                    : FilterMode.Allow;
+            }
             if (m_inPlusButton.IsClicked) {
                 m_component.m_inIndex++;
             }

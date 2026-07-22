@@ -1,6 +1,7 @@
 using Engine;
 using Engine.Graphics;
 using Game;
+using Logistics.Filtering;
 using System.Xml.Linq;
 
 namespace Logistics {
@@ -10,6 +11,7 @@ namespace Logistics {
         public GridPanelWidget m_itemGrid;
         public ButtonWidget m_inMinusButton;
         public ButtonWidget m_inPlusButton;
+        public ButtonWidget m_filterModeButton;
         protected readonly ButtonWidget m_outPlusButton;
         protected readonly ButtonWidget m_outMinusButton;
 
@@ -23,6 +25,7 @@ namespace Logistics {
             m_inPlusButton = Children.Find<ButtonWidget>("InPlusButton");
             m_outMinusButton = Children.Find<ButtonWidget>("OutMinusButton");
             m_outPlusButton = Children.Find<ButtonWidget>("OutPlusButton");
+            m_filterModeButton = Children.Find<ButtonWidget>("FilterModeButton");
             int num = 0;
             for (int i = 0; i < m_itemGrid.RowsCount; i++) {
                 for (int j = 0; j < m_itemGrid.ColumnsCount; j++) {
@@ -48,10 +51,20 @@ namespace Logistics {
                 ParentWidget.Children.Remove(this);
                 return;
             }
-            Children.Find<LabelWidget>("InCountText").TextAnchor = TextAnchor.HorizontalCenter | TextAnchor.VerticalCenter;
-            Children.Find<LabelWidget>("OutCountText").TextAnchor = TextAnchor.HorizontalCenter | TextAnchor.VerticalCenter;
-            Children.Find<LabelWidget>("InCountText").Text = string.Format(LanguageControl.GetContentWidgets("AdvancedInserterWidget", 3), m_component.m_inNum.ToString());
-            Children.Find<LabelWidget>("OutCountText").Text = string.Format(LanguageControl.GetContentWidgets("AdvancedInserterWidget", 4), m_component.m_outNum.ToString());
+            LabelWidget inCount = Children.Find<LabelWidget>("InCountText");
+            LabelWidget outCount = Children.Find<LabelWidget>("OutCountText");
+            inCount.TextAnchor = TextAnchor.HorizontalCenter | TextAnchor.VerticalCenter;
+            outCount.TextAnchor = TextAnchor.HorizontalCenter | TextAnchor.VerticalCenter;
+            inCount.Text = string.Format(LanguageControl.GetContentWidgets("AdvancedInserterWidget", 3), m_component.m_inNum.ToString());
+            outCount.Text = string.Format(LanguageControl.GetContentWidgets("AdvancedInserterWidget", 4), m_component.m_outNum.ToString());
+            m_filterModeButton.Text = m_component.m_filterMode == FilterMode.Allow
+                ? LanguageControl.GetContentWidgets("AdvancedInserterWidget", 6)
+                : LanguageControl.GetContentWidgets("AdvancedInserterWidget", 7);
+            if (m_filterModeButton.IsClicked) {
+                m_component.m_filterMode = m_component.m_filterMode == FilterMode.Allow
+                    ? FilterMode.Deny
+                    : FilterMode.Allow;
+            }
             if (m_inPlusButton.IsClicked) {
                 m_component.m_inNum++;
             }

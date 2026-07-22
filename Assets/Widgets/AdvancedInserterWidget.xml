@@ -2,23 +2,33 @@
 	<BevelledRectangleWidget Size="614, 382" BevelSize="3"/>
 	<LabelWidget CanvasWidget.Position="12, 14" Name="SmartInserter" Text="[AdvancedInserterWidget:1]" Color="255, 255, 255, 192"/>
 	<LabelWidget CanvasWidget.Position="306, 14" Name="InventoryLabel" Text="[AdvancedInserterWidget:2]" Color="255, 255, 255, 192"/>
-	<GridPanelWidget CanvasWidget.Position="120, 52" Name="ItemGrid" ColumnsCount="1" RowsCount="1"/>
 	<GridPanelWidget CanvasWidget.Position="306, 52" Name="InventoryGrid" ColumnsCount="4" RowsCount="4"/>
 
-	<CanvasWidget Size="288, 72" CanvasWidget.Position="12, 160">
-		<StackPanelWidget Direction="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-			<BevelledButtonWidget Name="InMinusButton" Style="{Styles/ButtonStyle_Minus}"/>
-			<LabelWidget CanvasWidget.Position="12, 200" Name="InCountText" Text="0" Color="255, 255, 255, 192" Size="100, 72"/>
-			<BevelledButtonWidget Name="InPlusButton" Style="{Styles/ButtonStyle_Plus}"/>
+	<CanvasWidget CanvasWidget.Position="12, 52" Size="288, 318" ClampToBounds="true">
+		<StackPanelWidget Direction="Vertical" HorizontalAlignment="Stretch">
+			<StackPanelWidget Direction="Horizontal" HorizontalAlignment="Stretch" Margin="0, 0, 0, 8">
+				<LabelWidget Name="FilterLabel" Text="[AdvancedInserterWidget:5]" Color="255, 255, 255, 192" VerticalAlignment="Center"/>
+				<CanvasWidget Size="Infinity, 0" HorizontalAlignment="Stretch"/>
+				<BevelledButtonWidget Name="FilterModeButton" Size="144, 40" Text="" VerticalAlignment="Center"/>
+			</StackPanelWidget>
+
+			<CanvasWidget Size="288, 120" Margin="0, 0, 0, 8" ClampToBounds="true">
+				<ScrollPanelWidget Direction="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+					<GridPanelWidget Name="ItemGrid" ColumnsCount="3" RowsCount="3" HorizontalAlignment="Center"/>
+				</ScrollPanelWidget>
+			</CanvasWidget>
+
+			<LabelWidget Name="ChannelsLabel" Text="[AdvancedInserterWidget:8]" Color="255, 255, 255, 160" HorizontalAlignment="Center" Margin="0, 0, 0, 4"/>
+			<StackPanelWidget Direction="Horizontal" HorizontalAlignment="Center" Margin="0, 0, 0, 8">
+				<BevelledButtonWidget Name="InMinusButton" Size="48, 48" Text="-" Margin="0, 0, 8, 0"/>
+				<LabelWidget Name="InCountText" Text="0" Color="255, 255, 255, 192" Size="120, 48" VerticalAlignment="Center"/>
+				<BevelledButtonWidget Name="InPlusButton" Size="48, 48" Text="+" Margin="8, 0, 0, 0"/>
+			</StackPanelWidget>
+			<StackPanelWidget Direction="Horizontal" HorizontalAlignment="Center">
+				<BevelledButtonWidget Name="OutMinusButton" Size="48, 48" Text="-" Margin="0, 0, 8, 0"/>
+				<LabelWidget Name="OutCountText" Text="0" Color="255, 255, 255, 192" Size="120, 48" VerticalAlignment="Center"/>
+				<BevelledButtonWidget Name="OutPlusButton" Size="48, 48" Text="+" Margin="8, 0, 0, 0"/>
+			</StackPanelWidget>
 		</StackPanelWidget>
 	</CanvasWidget>
-
-	<CanvasWidget Size="288, 72" CanvasWidget.Position="12, 268">
-		<StackPanelWidget Direction="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-			<BevelledButtonWidget Name="OutMinusButton" Style="{Styles/ButtonStyle_Minus}"/>
-			<LabelWidget CanvasWidget.Position="12, 200" Name="OutCountText" Text="0" Color="255, 255, 255, 192" Size="100, 72"/>
-			<BevelledButtonWidget Name="OutPlusButton" Style="{Styles/ButtonStyle_Plus}"/>
-		</StackPanelWidget>
-	</CanvasWidget>
-
 </ChestNewWidget>

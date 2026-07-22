@@ -1,6 +1,7 @@
 using Engine;
 using Game;
 using GameEntitySystem;
+using Logistics.Filtering;
 using SCIENEW;
 using SCIENEW.ProductionIO;
 using SCIENEW.Utils;
@@ -8,19 +9,25 @@ using TemplatesDatabase;
 
 namespace Logistics {
     public class ComponentAdvancedFluidInserter : ComponentTankBase {
+        public const int FilterTankCount = 4;
+
         public int m_inIndex;
         public int m_outIndex;
         public SubsystemTerrain m_subsystemTerrain;
         public ComponentBlockEntity m_componentBlockEntity;
         public SubsystemFluidTransfer m_subsystemFluidTransfer;
         public float m_unitVolume = 4;
+        public FilterMode m_filterMode = FilterMode.Allow;
+
+        /// <summary>样液过滤罐容量（仅存样例，不参与管网；方块未实现流体接口）。</summary>
+        public override float GetTankOriginalCapacity(int tankIndex) => 1f;
 
         public bool Insert() {
             if (!TryResolveTanks(out ITank fromTank, out ITank toTank)) {
                 return false;
             }
-            int filterValue = GetTankVolume(0) > 0f ? GetTankValue(0) : 0;
-            return TryInsertBetweenTanks(fromTank, toTank, m_inIndex, m_outIndex, filterValue, m_unitVolume);
+            ITransferFilter filter = TransferFilter.FromTank(this, 0, FilterTankCount, m_filterMode);
+            return TryInsertBetweenTanks(fromTank, toTank, m_inIndex, m_outIndex, filter, m_unitVolume);
         }
 
         bool TryResolveTanks(out ITank fromTank, out ITank toTank) {
@@ -63,16 +70,16 @@ namespace Logistics {
             ITank toTank,
             int inIndex,
             int outIndex,
-            int filterValue,
+            ITransferFilter filter,
             float unitVolume
         ) {
             if (inIndex > fromTank.TanksCount || outIndex > toTank.TanksCount) {
                 return false;
             }
-            foreach (int sourceIndex in ProductionSlotAccess.GetTankSourceSlotOrder(fromTank, filterValue, inIndex)) {
+            foreach (int sourceIndex in ProductionSlotAccess.GetTankSourceSlotOrder(fromTank, filterValue: 0, inIndex)) {
                 int fromValue = fromTank.GetTankValue(sourceIndex);
                 if (fromValue == 0) continue;
-                if (filterValue != 0 && fromValue != filterValue) continue;
+                if (!filter.Allows(fromValue)) continue;
                 if (!ProductionSlotAccess.CanInsertFluidIntoInputTanks(toTank, fromValue, outIndex)) continue;
                 float removedVolume = fromTank.RemoveTankFluid(sourceIndex, unitVolume);
                 if (removedVolume <= 0f) continue;
@@ -90,12 +97,16 @@ namespace Logistics {
             m_subsystemFluidTransfer = Project.FindSubsystem<SubsystemFluidTransfer>(true);
             m_inIndex = valuesDictionary.GetValue("InIndex", 0);
             m_outIndex = valuesDictionary.GetValue("OutIndex", 0);
+            m_filterMode = valuesDictionary.GetValue("FilterMode", 0) == (int)FilterMode.Deny
+                ? FilterMode.Deny
+                : FilterMode.Allow;
         }
 
         public override void Save(ValuesDictionary valuesDictionary, EntityToIdMap entityToIdMap) {
             base.Save(valuesDictionary, entityToIdMap);
             valuesDictionary.SetValue("InIndex", m_inIndex);
             valuesDictionary.SetValue("OutIndex", m_outIndex);
+            valuesDictionary.SetValue("FilterMode", (int)m_filterMode);
         }
     }
 }

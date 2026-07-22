@@ -5,14 +5,14 @@
 		<EntityTemplate Name="AdvancedInserter" Guid="a0b10002-d37d-455f-9a43-803260a915a9">
 			<MemberComponentTemplate Name="BlockEntity" Guid="a0b10002-96bc-4f0a-afa1-25e329cabd17" InheritanceParent="09a85cba-d94e-41b8-9497-f20ed942c17e" />
 			<MemberComponentTemplate Name="AdvancedInserter" Guid="a0b10002-dfe9-4331-900e-4c5f3ce25348" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9">
-				<Parameter Name="SlotsCount" Guid="a0b10002-1d3c-467e-84e8-08ba76134dc0" Value="1" Type="int" />
+				<Parameter Name="SlotsCount" Guid="a0b10002-1d3c-467e-84e8-08ba76134dc0" Value="9" Type="int" />
 				<Parameter Name="Class" Guid="a0b10002-1d3c-467e-81bc-1796f686be51" Value="Logistics.ComponentAdvancedInserter" Type="string" />
 			</MemberComponentTemplate>
 		</EntityTemplate>
 		<EntityTemplate Name="AdvancedFluidInserter" Guid="a0b10003-d37d-455f-9a43-803260a915a9">
 			<MemberComponentTemplate Name="BlockEntity" Guid="a0b10003-96bc-4f0a-afa1-25e329cabd17" InheritanceParent="09a85cba-d94e-41b8-9497-f20ed942c17e" />
 			<MemberComponentTemplate Name="AdvancedFluidInserter" Guid="a0b10003-dfe9-4331-900e-4c5f3ce25348" InheritanceParent="00000001-0000-4f53-8d64-0c30aabab8f9">
-				<Parameter Name="TanksCount" Guid="a0b10003-2da2-467e-84e8-08ba76134dc0" Value="1" Type="int" />
+				<Parameter Name="TanksCount" Guid="a0b10003-2da2-467e-84e8-08ba76134dc0" Value="4" Type="int" />
 				<Parameter Name="Class" Guid="a0b10003-1d3c-467e-81bc-1796f686be51" Value="Logistics.ComponentAdvancedFluidInserter" Type="string" />
 			</MemberComponentTemplate>
 		</EntityTemplate>
