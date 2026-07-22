@@ -1,0 +1,28 @@
+{
+  "AdvancedInserterBlock": {
+    "Inserter": "Advanced Inserter",
+    "FluidInserter": "Advanced Fluid Inserter",
+    "DescriptionInserter": "On an electric pulse, pulls items from the rear container into the front one. Sample slots can filter item types.\nWith no front container, items are ejected.",
+    "DescriptionFluidInserter": "On an electric pulse, moves roughly one bucket of fluid from the rear tank to the front tank.\nA sample fluid can filter which liquids are moved."
+  },
+  "ContentWidgets": {
+    "AdvancedInserterWidget": {
+      "1": "Advanced Inserter",
+      "2": "Inventory",
+      "3": "Input: {0}",
+      "4": "Output: {0}"
+    },
+    "AdvancedFluidInserterWidget": {
+      "1": "Advanced Fluid Inserter",
+      "2": "Inventory",
+      "3": "Input: {0}",
+      "4": "Output: {0}"
+    }
+  },
+  "IECraftingRecipes": {
+    "Descriptions": {
+      "AdvancedInserter": "Craft an advanced inserter",
+      "AdvancedFluidInserter": "Craft an advanced fluid inserter"
+    }
+  }
+}

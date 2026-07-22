@@ -1,0 +1,12 @@
+<Recipes>
+	<Recipe Result="AdvancedInserterBlock:0" ResultCount="1" RequiredHeatLevel="0" a="memorybank" b="dispenser" c="I-IndustrialPiston" Description="[AdvancedInserter]">
+		"aca"
+		"aba"
+		"aca"
+	</Recipe>
+	<Recipe Result="AdvancedInserterBlock:8" ResultCount="1" RequiredHeatLevel="0" a="memorybank" b="D-CheckValveDevice" c="I-IndustrialPiston" Description="[AdvancedFluidInserter]">
+		"aca"
+		"aba"
+		"aca"
+	</Recipe>
+</Recipes>
