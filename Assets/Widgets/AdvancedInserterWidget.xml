@@ -13,9 +13,9 @@
 			</StackPanelWidget>
 
 			<CanvasWidget Size="288, 120" Margin="0, 0, 0, 8" ClampToBounds="true">
-				<ScrollPanelWidget Direction="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-					<GridPanelWidget Name="ItemGrid" ColumnsCount="3" RowsCount="3" HorizontalAlignment="Center"/>
-				</ScrollPanelWidget>
+				<LogisticsScrollPanelWidget xmlns="runtime-namespace:Logistics" Direction="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+					<GridPanelWidget xmlns="runtime-namespace:Game" Name="ItemGrid" ColumnsCount="3" RowsCount="3" HorizontalAlignment="Center"/>
+				</LogisticsScrollPanelWidget>
 			</CanvasWidget>
 
 			<LabelWidget Name="ChannelsLabel" Text="[AdvancedInserterWidget:8]" Color="255, 255, 255, 160" HorizontalAlignment="Center" Margin="0, 0, 0, 4"/>
