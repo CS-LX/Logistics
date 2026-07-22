@@ -1,0 +1,17 @@
+## Build
+[Bb]in/
+[Oo]bj/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Local pack config (machine paths)
+tools/pack.config.json
+
+## OS / IDE
+Thumbs.db
+Desktop.ini
+.idea/
+*.DotSettings.user

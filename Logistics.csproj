@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>annotations</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants>API18</DefineConstants>
+    <LangVersion>preview</LangVersion>
+    <AssemblyName>Logistics</AssemblyName>
+    <RootNamespace>Logistics</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="tools\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SurvivalcraftAPI.Survivalcraft" Version="1.9.2" />
+  </ItemGroup>
+
+  <!-- monorepo 内可选：编译期引用 IE2 API；运行时由 modinfo 依赖 com.IndustrialEra2 提供，勿 copy-local。
+       Private=false 同 SCIENEW→RecipaediaEX；另需 DisableTransitiveProjectReferences + ExcludeAssets(contentfiles)，
+       以免经 SCIENEW 传递的 GEN/XamariNES/REX 程序集与资源落入本包。 -->
+  <PropertyGroup Condition="Exists('$(MSBuildThisFileDirectory)..\..\SCIENEW\SCIENEW.csproj')">
+    <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
+  </PropertyGroup>
+  <ItemGroup Condition="Exists('$(MSBuildThisFileDirectory)..\..\SCIENEW\SCIENEW.csproj')">
+    <ProjectReference Include="..\..\SCIENEW\SCIENEW.csproj">
+      <Private>false</Private>
+      <ExcludeAssets>contentfiles</ExcludeAssets>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="modinfo.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="icon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <Target Name="PackMod" AfterTargets="Build" Condition="'$(LogisticsSkipPack)' != 'true'">
+    <PropertyGroup>
+      <_TargetDirSafe>$(TargetDir.TrimEnd('\'))</_TargetDirSafe>
+    </PropertyGroup>
+    <Message Text="[PackMod] Target fired. TargetDir=$(_TargetDirSafe)" Importance="High" />
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)tools\pack.ps1&quot; -BuildOutputDir &quot;$(_TargetDirSafe)&quot; -Configuration &quot;$(Configuration)&quot;" />
+  </Target>
+</Project>

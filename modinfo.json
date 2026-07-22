@@ -1,0 +1,13 @@
+{
+  "Name": "工业时代2：物流",
+  "Version": "0.1.0.0",
+  "ApiVersion": "1.9.2",
+  "Description": "工业时代2附属模组：物流系统。",
+  "ScVersion": "2.4.0.0",
+  "Link": "",
+  "Author": "Industrial Era 2",
+  "PackageName": "com.ie2.logistics",
+  "Dependencies": {
+    "com.IndustrialEra2": "1.0.0.0"
+  }
+}
