@@ -52,14 +52,9 @@ namespace Logistics {
                     Color.White);
                 collisionByFace[i] = [meshesByFace[i].CalculateBoundingBox()];
             }
-            standalone.AppendModelMeshPart(
-                model.FindMesh(meshName).MeshParts[0],
-                boneAbsoluteTransform * Matrix.CreateTranslation(0f, -0.5f, 0f),
-                makeEmissive: false,
-                flipWindingOrder: false,
-                doubleSided: false,
-                flipNormals: false,
-                Color.White);
+            // 与 IE2 Inserter/FluidInserter（useStandaloneMesh: false）一致：物品栏用 face0 水平朝向。
+            standalone.AppendBlockMesh(meshesByFace[0]);
+            standalone.TransformPositions(Matrix.CreateTranslation(-0.5f, -0.5f, -0.5f));
         }
 
         public static int GetFacing(int value) => Terrain.ExtractData(value) & FacingMask;
@@ -104,7 +99,7 @@ namespace Logistics {
             return IsFluid(value) ? m_fluidCollisionByFace[facing] : m_inserterCollisionByFace[facing];
         }
 
-        public override int GetFaceTextureSlot(int face, int value) => IsFluid(value) ? 107 : 170;
+        public override int GetFaceTextureSlot(int face, int value) => 5;
 
         public override BlockDebrisParticleSystem CreateDebrisParticleSystem(SubsystemTerrain subsystemTerrain, Vector3 position, int value, float strength) {
             return new BlockDebrisParticleSystem(
@@ -112,7 +107,7 @@ namespace Logistics {
                 position,
                 1,
                 1,
-                LogisticsDeviceColors.AdvancedBlue,
+                Color.White,
                 GetFaceTextureSlot(0, value),
                 m_texture);
         }
@@ -151,7 +146,7 @@ namespace Logistics {
                 y,
                 z,
                 mesh,
-                LogisticsDeviceColors.AdvancedBlue,
+                Color.White,
                 null,
                 null,
                 geometry.GetGeometry(m_texture).SubsetAlphaTest);
@@ -168,7 +163,7 @@ namespace Logistics {
                 primitivesRenderer,
                 mesh,
                 m_texture,
-                LogisticsDeviceColors.AdvancedBlue * color,
+                color,
                 size,
                 ref matrix,
                 environmentData);
