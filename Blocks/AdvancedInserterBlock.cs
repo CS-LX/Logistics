@@ -24,9 +24,9 @@ namespace Logistics {
 
         public override void Initialize() {
             base.Initialize();
-            m_texture = IndustrialModLoader.IETexture;
-            BuildMeshes("Models/Inserter", "Inserter", m_inserterMeshesByFace, m_inserterCollisionByFace, m_inserterStandalone);
-            BuildMeshes("Models/FluidInserter", "Inserter", m_fluidMeshesByFace, m_fluidCollisionByFace, m_fluidStandalone);
+            m_texture = ContentManager.Get<Texture2D>("Logistics");
+            BuildMeshes("Models/AdvancedInserter", "Inserter", m_inserterMeshesByFace, m_inserterCollisionByFace, m_inserterStandalone);
+            BuildMeshes("Models/AdvancedFluidInserter", "Inserter", m_fluidMeshesByFace, m_fluidCollisionByFace, m_fluidStandalone);
         }
 
         static void BuildMeshes(string modelPath, string meshName, BlockMesh[] meshesByFace, BoundingBox[][] collisionByFace, BlockMesh standalone) {
