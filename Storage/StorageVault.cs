@@ -35,6 +35,79 @@ namespace Logistics {
             Version++;
         }
 
+        /// <summary>扩容到新成员数（仅增大）。</summary>
+        public void ExpandToMemberCount(int memberCount) {
+            if (memberCount < MemberCount) {
+                throw new InvalidOperationException("Use ShrinkToMemberCount to reduce capacity.");
+            }
+            SetMemberCount(memberCount);
+        }
+
+        /// <summary>
+        /// 缩容：先 Compact，再将超出新容量的尾部槽在 <paramref name="ejectPosition"/> 爆出。
+        /// </summary>
+        public void ShrinkToMemberCount(Project project, int memberCount, Vector3 ejectPosition) {
+            CompactIfNeeded();
+            Compact();
+            int newCapacity = Math.Max(0, memberCount) * SlotsPerUnit;
+            SubsystemPickables pickables = project.FindSubsystem<SubsystemPickables>(true);
+            for (int i = m_slots.Count - 1; i >= newCapacity; i--) {
+                int count = GetSlotCount(i);
+                if (count > 0) {
+                    int value = GetSlotValue(i);
+                    m_slots[i].Count = 0;
+                    m_slots[i].Value = 0;
+                    Vector3 velocity = m_random.Float(5f, 10f)
+                        * Vector3.Normalize(new Vector3(m_random.Float(-1f, 1f), m_random.Float(1f, 2f), m_random.Float(-1f, 1f)));
+                    pickables.AddPickable(value, count, ejectPosition, velocity, null);
+                }
+            }
+            SetMemberCount(memberCount);
+            Compact();
+        }
+
+        /// <summary>把 <paramref name="other"/> 的占用槽追加到末尾（调用前双方应已按成员数设好 Capacity）。</summary>
+        public void AppendContentsFrom(StorageVault other) {
+            other.CompactIfNeeded();
+            other.Compact();
+            CompactIfNeeded();
+            Compact();
+            int write = CountOccupiedSlots();
+            int occupied = other.CountOccupiedSlots();
+            for (int i = 0; i < occupied; i++) {
+                if (write >= Capacity) break;
+                m_slots[write].Value = other.GetSlotValue(i);
+                m_slots[write].Count = other.GetSlotCount(i);
+                write++;
+            }
+            Version++;
+            Compact();
+        }
+
+        /// <summary>
+        /// 将本库槽窗口 <paramref name="srcStart"/> 起 <paramref name="length"/> 格中的非空项迁到 <paramref name="destination"/>。
+        /// 不压缩本库（挖断多窗切分时从高到低调用，需保持源下标稳定）；调用方最后自行 Compact。
+        /// </summary>
+        public void MoveWindowTo(StorageVault destination, int srcStart, int length) {
+            destination.CompactIfNeeded();
+            destination.Compact();
+            int destWrite = 0;
+            for (int j = 0; j < length; j++) {
+                int src = srcStart + j;
+                if (src < 0 || src >= m_slots.Count) break;
+                int count = m_slots[src].Count;
+                if (count <= 0) continue;
+                if (destWrite >= destination.Capacity) break;
+                destination.m_slots[destWrite].Value = m_slots[src].Value;
+                destination.m_slots[destWrite].Count = count;
+                m_slots[src].Value = 0;
+                m_slots[src].Count = 0;
+                destWrite++;
+            }
+            destination.Compact();
+            Version++;
+        }
+
         void EnsureSlotCount(int count) {
             while (m_slots.Count < count) {
                 m_slots.Add(new ComponentInventoryBase.Slot());

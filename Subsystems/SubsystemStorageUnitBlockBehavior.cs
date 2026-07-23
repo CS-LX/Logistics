@@ -25,9 +25,7 @@ namespace Logistics {
             Point3 point = new(x, y, z);
             Entity entity = BlockEntityUtils.CreateBlockEntity(m_subsystemTerrain, EntityName, point);
             var unit = entity.FindComponent<ComponentStorageUnit>(true);
-            Guid id = Guid.NewGuid();
-            m_subsystemStorageVaults.Create(id, memberCount: 1);
-            unit.VaultGuid = id;
+            m_subsystemStorageVaults.IntegrateNewUnit(unit, point);
         }
 
         public override void OnBlockRemoved(int value, int newValue, int x, int y, int z) {
@@ -36,15 +34,12 @@ namespace Logistics {
             if (blockEntity == null) return;
 
             var unit = blockEntity.Entity.FindComponent<ComponentStorageUnit>();
-            Vector3 dropPos = new Vector3(point) + new Vector3(0.5f);
-            if (unit != null && unit.VaultGuid != Guid.Empty
-                && m_subsystemStorageVaults.TryGet(unit.VaultGuid, out StorageVault vault)) {
-                vault.DropAllItems(Project, dropPos);
-                m_subsystemStorageVaults.Remove(unit.VaultGuid);
-            }
+            Guid vaultGuid = unit?.VaultGuid ?? Guid.Empty;
+            Vector3 ejectPos = new Vector3(point) + new Vector3(0.5f);
 
-            // 不走 BlockEntityUtils.RemoveBlockEntity：避免与储存库 Drop 重复；Unit.DropAllItems 本为 no-op。
+            // 先卸实体，再按地形剩余分量切分（Collect 依赖方块已不在该格）
             Project.RemoveEntity(blockEntity.Entity, disposeEntity: true);
+            m_subsystemStorageVaults.DisintegrateRemovedUnit(vaultGuid, point, ejectPos);
         }
 
         public override void OnBlockGenerated(int value, int x, int y, int z, bool isLoaded) {
@@ -56,11 +51,8 @@ namespace Logistics {
             var unit = blockEntity.Entity.FindComponent<ComponentStorageUnit>();
             if (unit == null) return;
             if (unit.VaultGuid == Guid.Empty || !m_subsystemStorageVaults.TryGet(unit.VaultGuid, out _)) {
-                Guid id = unit.VaultGuid != Guid.Empty ? unit.VaultGuid : Guid.NewGuid();
-                if (!m_subsystemStorageVaults.TryGet(id, out _)) {
-                    m_subsystemStorageVaults.Create(id, memberCount: 1);
-                }
-                unit.VaultGuid = id;
+                // 读档缺库时恢复：并入邻簇或新建，避免孤立空 Guid
+                m_subsystemStorageVaults.IntegrateNewUnit(unit, point);
             }
         }
 

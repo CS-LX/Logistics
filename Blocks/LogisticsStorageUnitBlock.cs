@@ -6,10 +6,11 @@ using SCIENEW;
 namespace Logistics {
     /// <summary>
     /// 物流存储单元：不透明立方体，六面共用 <see cref="FaceTextureSlot"/>（Logistics 图集第 5 格，0-based）。
-    /// 独立 Index，不与 Transfer / 抓取机等共用 Data 变体。
+    /// Index 写法对齐 SCIENEW <c>BaseNormalBlock</c>；不与 Transfer / 抓取机等共用 Data 变体。
     /// </summary>
     public class LogisticsStorageUnitBlock : CubeBlock {
-        public const int Index = 552;
+        public static int Index = 552;
+        public override bool IsIndexDynamic => false;
 
         /// <summary>Logistics.png 图集格子：青边方块面（与抓取机 debris 同格）。</summary>
         public const int FaceTextureSlot = 5;

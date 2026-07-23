@@ -4,7 +4,7 @@ using Game;
 using GameEntitySystem;
 
 namespace Logistics {
-    /// <summary>M1：单页 6×4=24 格储存库 UI（左库右背包）。</summary>
+    /// <summary>M1：单页 6×4=24 格储存库 UI（左库右背包）。分页见 M3。</summary>
     public class StorageVaultWidget : CanvasWidget {
         public const int GridColumns = 6;
         public const int GridRows = 4;
