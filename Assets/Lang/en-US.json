@@ -5,6 +5,10 @@
     "DescriptionInserter": "On an electric pulse, pulls items from the rear container into the front one.\nPlace samples in filter slots and use allow-list or deny-list; an empty list filters nothing.\nWith no front container, items are ejected.",
     "DescriptionFluidInserter": "On an electric pulse, moves roughly one bucket of fluid from the rear tank to the front tank.\nPlace sample fluids and use allow-list or deny-list; an empty list filters nothing."
   },
+  "LogisticsStorageUnitBlock": {
+    "DisplayName": "Logistics Storage Unit",
+    "Description": "A storage block for the logistics network."
+  },
   "ContentWidgets": {
     "AdvancedInserterWidget": {
       "1": "Advanced Inserter",

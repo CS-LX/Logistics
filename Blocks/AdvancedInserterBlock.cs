@@ -20,11 +20,9 @@ namespace Logistics {
         BoundingBox[][] m_fluidCollisionByFace = new BoundingBox[6][];
         BlockMesh m_inserterStandalone = new();
         BlockMesh m_fluidStandalone = new();
-        Texture2D m_texture;
 
         public override void Initialize() {
             base.Initialize();
-            m_texture = ContentManager.Get<Texture2D>("Logistics");
             BuildMeshes("Models/AdvancedInserter", "Inserter", m_inserterMeshesByFace, m_inserterCollisionByFace, m_inserterStandalone);
             BuildMeshes("Models/AdvancedFluidInserter", "Inserter", m_fluidMeshesByFace, m_fluidCollisionByFace, m_fluidStandalone);
         }
@@ -109,7 +107,7 @@ namespace Logistics {
                 1,
                 Color.White,
                 GetFaceTextureSlot(0, value),
-                m_texture);
+                LogisticsLoader.BlockTexture);
         }
 
         public override BlockPlacementData GetPlacementValue(SubsystemTerrain subsystemTerrain, ComponentMiner componentMiner, int value, TerrainRaycastResult raycastResult) {
@@ -149,7 +147,7 @@ namespace Logistics {
                 Color.White,
                 null,
                 null,
-                geometry.GetGeometry(m_texture).SubsetAlphaTest);
+                geometry.GetGeometry(LogisticsLoader.BlockTexture).SubsetAlphaTest);
             if (IsFluid(value)) {
                 for (int i = 0; i < 5; i++) {
                     generator.GenerateWireVertices(value, x, y, z, i, 0, Vector2.Zero, geometry.SubsetOpaque);
@@ -162,7 +160,7 @@ namespace Logistics {
             BlocksManager.DrawMeshBlock(
                 primitivesRenderer,
                 mesh,
-                m_texture,
+                LogisticsLoader.BlockTexture,
                 color,
                 size,
                 ref matrix,

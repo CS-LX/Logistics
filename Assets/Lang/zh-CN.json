@@ -5,6 +5,10 @@
     "DescriptionInserter": "高级抓取机：收到电信号脉冲时，从后方容器取出物品并塞进前方容器。\n可在过滤格放入样例，并用白名单/黑名单限制种类；名单为空时不过滤。\n前方没有容器时会把物品弹出。",
     "DescriptionFluidInserter": "高级抓取阀：收到电信号脉冲时，把后方储罐中的流体抽到前方储罐，大约每次一桶的量。\n可在样液格放入样液，并用白名单/黑名单限制种类；名单为空时不过滤。"
   },
+  "LogisticsStorageUnitBlock": {
+    "DisplayName": "物流存储单元",
+    "Description": "物流网络用的存储方块。"
+  },
   "ContentWidgets": {
     "AdvancedInserterWidget": {
       "1": "高级抓取机",
