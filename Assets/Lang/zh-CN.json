@@ -29,8 +29,8 @@
   },
   "IECraftingRecipes": {
     "Descriptions": {
-      "AdvancedInserter": "做一个高级抓取机",
-      "AdvancedFluidInserter": "做一个高级抓取阀"
+      "AdvancedInserter": "给抓取机加装电路与逻辑门，改造成高级抓取机",
+      "AdvancedFluidInserter": "给流体抓取阀加装电路与逻辑门，改造成高级抓取阀"
     }
   }
 }

@@ -29,8 +29,8 @@
   },
   "IECraftingRecipes": {
     "Descriptions": {
-      "AdvancedInserter": "Craft an advanced inserter",
-      "AdvancedFluidInserter": "Craft an advanced fluid inserter"
+      "AdvancedInserter": "Upgrade an inserter with a circuit and logic gates",
+      "AdvancedFluidInserter": "Upgrade a fluid inserter with a circuit and logic gates"
     }
   }
 }
