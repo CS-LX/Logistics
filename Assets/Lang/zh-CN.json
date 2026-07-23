@@ -7,7 +7,7 @@
   },
   "LogisticsStorageUnitBlock": {
     "DisplayName": "物流存储单元",
-    "Description": "物流网络用的存储方块。"
+    "Description": "可连通扩展的存储方块。相邻单元共享同一储存库；右键打开库界面。"
   },
   "ContentWidgets": {
     "AdvancedInserterWidget": {
@@ -29,6 +29,10 @@
       "6": "白名单",
       "7": "黑名单",
       "8": "通道"
+    },
+    "StorageVaultWidget": {
+      "1": "储存库",
+      "2": "背包"
     }
   },
   "IECraftingRecipes": {

@@ -22,6 +22,8 @@ namespace Logistics {
         public override string GetDescription(int value)
             => LanguageControl.Get(nameof(LogisticsStorageUnitBlock), "Description");
 
+        public override bool IsInteractive(SubsystemTerrain subsystemTerrain, int value) => true;
+
         public override string GetCraftingId(int value) => "logisticsstorageunit";
 
         public override int GetTextureSlotCount(int value) => 16;

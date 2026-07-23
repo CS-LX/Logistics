@@ -7,7 +7,7 @@
   },
   "LogisticsStorageUnitBlock": {
     "DisplayName": "Logistics Storage Unit",
-    "Description": "A storage block for the logistics network."
+    "Description": "An expandable storage block. Adjacent units share one vault; right-click to open it."
   },
   "ContentWidgets": {
     "AdvancedInserterWidget": {
@@ -29,6 +29,10 @@
       "6": "Allow list",
       "7": "Deny list",
       "8": "Channels"
+    },
+    "StorageVaultWidget": {
+      "1": "Storage Vault",
+      "2": "Inventory"
     }
   },
   "IECraftingRecipes": {

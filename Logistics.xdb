@@ -16,11 +16,23 @@
 				<Parameter Name="Class" Guid="a0b10003-1d3c-467e-81bc-1796f686be51" Value="Logistics.ComponentAdvancedFluidInserter" Type="string" />
 			</MemberComponentTemplate>
 		</EntityTemplate>
+		<EntityTemplate Name="LogisticsStorageUnit" Guid="a0b10005-d37d-455f-9a43-803260a915a9">
+			<MemberComponentTemplate Name="BlockEntity" Guid="a0b10005-96bc-4f0a-afa1-25e329cabd17" InheritanceParent="09a85cba-d94e-41b8-9497-f20ed942c17e" />
+			<MemberComponentTemplate Name="StorageUnit" Guid="a0b10005-dfe9-4331-900e-4c5f3ce25348" InheritanceParent="b05700ed-7e4e-4679-98f5-b597f421496b">
+				<Parameter Name="Class" Guid="a0b10005-1d3c-467e-81bc-1796f686be51" Value="Logistics.ComponentStorageUnit" Type="string" />
+			</MemberComponentTemplate>
+		</EntityTemplate>
 	</Folder>
 	<!-- 与宿主 / IE2 共用 Project Guid，MemberSubsystemTemplate 才会并入世界 Project -->
 	<ProjectTemplate Name="Project" Guid="85023bf8-1c90-4dd1-9442-e6c13691d078">
 		<MemberSubsystemTemplate Name="AdvancedInserterBlockBehavior" Guid="a0b10004-f4d8-131f-e3ca-b4232fe1fc5f" InheritanceParent="aea46453-65b5-463a-9e0b-45f80bc41285">
 			<Parameter Name="Class" Guid="a0b10004-d101-9ae8-8129-494b3004a068" Value="Logistics.SubsystemAdvancedInserterBlockBehavior" Type="string" />
+		</MemberSubsystemTemplate>
+		<MemberSubsystemTemplate Name="StorageVaults" Guid="a0b10006-f4d8-131f-e3ca-b4232fe1fc5f" InheritanceParent="a3914c13-7801-46a6-b23a-9e2b36e9defb">
+			<Parameter Name="Class" Guid="a0b10006-d101-9ae8-8129-494b3004a068" Value="Logistics.SubsystemStorageVaults" Type="string" />
+		</MemberSubsystemTemplate>
+		<MemberSubsystemTemplate Name="StorageUnitBlockBehavior" Guid="a0b10007-f4d8-131f-e3ca-b4232fe1fc5f" InheritanceParent="aea46453-65b5-463a-9e0b-45f80bc41285">
+			<Parameter Name="Class" Guid="a0b10007-d101-9ae8-8129-494b3004a068" Value="Logistics.SubsystemStorageUnitBlockBehavior" Type="string" />
 		</MemberSubsystemTemplate>
 	</ProjectTemplate>
 </Logistics>
