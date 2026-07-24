@@ -1,9 +1,10 @@
 using Engine;
 using Game;
+using GameEntitySystem;
 using TemplatesDatabase;
 
 namespace Logistics {
-    /// <summary>输送带行为：邻接时自动对齐朝向与爬坡（仿铁轨，不转弯）。</summary>
+    /// <summary>输送带行为：邻接时自动对齐朝向与爬坡（仿铁轨，不转弯）；变更时请求 Group 重建。</summary>
     public class SubsystemConveyerBeltBlockBehavior : SubsystemBlockBehavior {
         /// <summary>与 SCIENEW 铁轨一致：行=水平四向(0=-Z,1=-X,2=+Z,3=+X)，列=同层/上层/下层。</summary>
         static readonly Point3[,] NeighborOffsets = {
@@ -14,17 +15,35 @@ namespace Logistics {
         };
 
         SubsystemTerrain m_subsystemTerrain;
+        SubsystemBeltGroups m_subsystemBeltGroups;
 
         public override int[] HandledBlocks => [BlocksManager.GetBlockIndex<ConveyerBeltBlock>()];
 
         public override void Load(ValuesDictionary valuesDictionary) {
             base.Load(valuesDictionary);
             m_subsystemTerrain = Project.FindSubsystem<SubsystemTerrain>(throwOnError: true);
+            m_subsystemBeltGroups = Project.FindSubsystem<SubsystemBeltGroups>(throwOnError: true);
             ConveyerBeltAnimatedTexture.EnsureLoaded();
         }
 
         public override void OnBlockAdded(int value, int oldValue, int x, int y, int z) {
             UpdateOrientation(x, y, z, step: 1);
+            m_subsystemBeltGroups.RequestRebuild(new Point3(x, y, z));
+        }
+
+        public override void OnBlockRemoved(int value, int newValue, int x, int y, int z) {
+            Point3 point = new(x, y, z);
+            m_subsystemBeltGroups.RequestRebuild(point);
+            for (int i = 0; i < 4; i++) {
+                for (int k = 0; k < 3; k++) {
+                    Point3 o = NeighborOffsets[i, k];
+                    m_subsystemBeltGroups.RequestRebuild(new Point3(x + o.X, y + o.Y, z + o.Z));
+                }
+            }
+        }
+
+        public override void OnBlockGenerated(int value, int x, int y, int z, bool isLoaded) {
+            m_subsystemBeltGroups.RequestRebuild(new Point3(x, y, z));
         }
 
         public override void OnNeighborBlockChanged(int x, int y, int z, int neighborX, int neighborY, int neighborZ) {
@@ -33,6 +52,29 @@ namespace Logistics {
                 return;
             }
             UpdateOrientation(x, y, z, step: 1);
+            m_subsystemBeltGroups.RequestRebuild(new Point3(x, y, z));
+            m_subsystemBeltGroups.RequestRebuild(new Point3(neighborX, neighborY, neighborZ));
+        }
+
+        /// <summary>P0 黑盒：点击查看本格序号；全局拓扑请按 F6 开调试框。</summary>
+        public override bool OnInteract(TerrainRaycastResult raycastResult, ComponentMiner componentMiner) {
+            ComponentPlayer player = componentMiner.ComponentPlayer;
+            if (player == null) {
+                return false;
+            }
+            Point3 point = raycastResult.CellFace.Point;
+            if (!m_subsystemBeltGroups.TryGetAt(point, out BeltGroup group)) {
+                player.ComponentGui.DisplaySmallMessage("输送带：尚未编组（等一帧）。按 F6 开调试绘制", Color.White, blinking: true, playNotificationSound: false);
+                return true;
+            }
+            int index = group.Members.IndexOf(point);
+            string shortId = group.Id.ToString("N")[..8];
+            player.ComponentGui.DisplaySmallMessage(
+                $"组 {shortId} 本格#{index}/{group.Members.Count} Sign={group.Sign}（F6 调试框）",
+                Color.White,
+                blinking: true,
+                playNotificationSound: false);
+            return true;
         }
 
         void UpdateOrientation(int x, int y, int z, int step) {
