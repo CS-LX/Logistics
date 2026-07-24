@@ -2,7 +2,8 @@
 
 > 参考来源：[Creators-of-Create/Create](https://github.com/Creators-of-Create/Create)（开源，分支示例 `mc1.21.1/dev`）  
 > 核心路径：`src/main/java/com/simibubi/create/content/kinetics/belt/`  
-> 调研目的：为本附属模组设计传送带 / 连续物流时提供实现对照，**非**照搬 Create 玩法与 API。
+> 调研目的：为本附属模组设计传送带 / 连续物流时提供实现对照，**非**照搬 Create 玩法与 API。  
+> 文档性质：**调研归档**（非施工单）。落地步骤见 [输送带实现计划.md](../输送带实现计划.md)。
 
 **一句话结论：不是格子库存，而是「整条皮带一条有序链表 + 连续浮点位置」的仿真。**
 
@@ -137,8 +138,8 @@ flowchart TD
 
 **与 IE2 主仓现状的关系：**
 
-主仓已有 Factorio 风格传送带行为（`SubsystemFactorioTransportBeltBlockBehavior` 等，见主仓 `docs/guides/SCIENEW-接口与联网API指南.md` §4.7）。本调研描述的是 **Create 连续位置模型**，与槽位 / 弹射物驱动模型是另一条设计轴；选型时明确要对齐哪一种，避免混用两套语义。
+主仓曾有 Factorio 风格传送带（`SubsystemFactorioTransportBeltBlockBehavior` 等）可供算法对照；**已废弃、主仓不打包**，Logistics 输送带不与之并存或互通。选型对齐 [输送带实现计划.md](../输送带实现计划.md) 的 Create 连续位置模型即可。
 
 ---
 
-*调研记录：2026-07-24*
+*调研记录：2026-07-24；关系说明更正：2026-07-25*
