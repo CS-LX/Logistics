@@ -394,6 +394,10 @@ namespace Logistics {
 
         public override string CraftingId => "advancedsorter";
 
+        public override string EntityName => "AdvancedSorter";
+
+        public override bool IsInteractive(SubsystemTerrain subsystemTerrain, int value) => true;
+
         public override int GetDisplayOrder(AdvancedLogisticsDeviceBlock block, int value) => block.DisplayOrder - 1;
 
         public override int GetFaceTextureSlot(int face, int value) {
@@ -404,6 +408,12 @@ namespace Logistics {
                 3 => 4,
                 _ => 5
             };
+        }
+
+        public override bool OpenWidget(IInventory inventory, ComponentMiner componentMiner, ComponentBlockEntity blockEntity) {
+            var component = blockEntity.Entity.FindComponent<ComponentAdvancedSorter>(throwOnError: true);
+            componentMiner.ComponentPlayer.ComponentGui.ModalPanelWidget = new AdvancedSorterWidget(inventory, component);
+            return true;
         }
     }
 }

@@ -5,7 +5,7 @@
     "Sorter": "Advanced Sorter",
     "DescriptionInserter": "On an electric pulse, pulls items from the rear container into the front one.\nPlace samples in filter slots and use allow-list or deny-list; an empty list filters nothing.\nWith no front container, items are ejected.",
     "DescriptionFluidInserter": "On an electric pulse, moves roughly one bucket of fluid from the rear tank to the front tank.\nPlace sample fluids and use allow-list or deny-list; an empty list filters nothing.",
-    "DescriptionSorter": "A placeholder block for future multi-channel logistics sorting. The top and bottom use casing, while the four sides show red, green, yellow, and blue ports."
+    "DescriptionSorter": "When items hit this sorter, they are ejected by the red, yellow, green, or blue side filters and never enter the machine. Each side has an allow-list or deny-list with sample slots: an empty allow-list rejects on that side; an empty deny-list takes the rest. Unmatched items bounce back. Sides are checked red → yellow → green → blue."
   },
   "LogisticsStorageUnitBlock": {
     "DisplayName": "Logistics Storage Unit",
@@ -36,12 +36,24 @@
       "1": "Storage Vault",
       "2": "Inventory",
       "3": "{0}/{1}"
+    },
+    "AdvancedSorterWidget": {
+      "1": "Advanced Sorter",
+      "2": "Inventory",
+      "3": "Filter",
+      "4": "Allow list",
+      "5": "Deny list",
+      "6": "Red",
+      "7": "Yellow",
+      "8": "Green",
+      "9": "Blue"
     }
   },
   "IECraftingRecipes": {
     "Descriptions": {
       "AdvancedInserter": "Upgrade an inserter with a circuit, logic gates, and zinc-sheet cladding",
       "AdvancedFluidInserter": "Upgrade a fluid inserter with a circuit, logic gates, and zinc-sheet cladding",
+      "AdvancedSorter": "Upgrade a sorter with a circuit, logic gates, and zinc-sheet cladding",
       "LogisticsStorageUnitChest": "Assemble a logistics storage unit from a iron chest and zinc plates",
       "LogisticsStorageUnitSteelChest": "Assemble a logistics storage unit from a steel chest and fewer zinc plates"
     }

@@ -22,6 +22,13 @@
 				<Parameter Name="Class" Guid="a0b10005-1d3c-467e-81bc-1796f686be51" Value="Logistics.ComponentStorageUnit" Type="string" />
 			</MemberComponentTemplate>
 		</EntityTemplate>
+		<EntityTemplate Name="AdvancedSorter" Guid="a0b10008-d37d-455f-9a43-803260a915a9">
+			<MemberComponentTemplate Name="BlockEntity" Guid="a0b10008-96bc-4f0a-afa1-25e329cabd17" InheritanceParent="09a85cba-d94e-41b8-9497-f20ed942c17e" />
+			<MemberComponentTemplate Name="AdvancedSorter" Guid="a0b10008-dfe9-4331-900e-4c5f3ce25348" InheritanceParent="81a44c6a-c30a-4f53-8d64-0c30aabab8f9">
+				<Parameter Name="SlotsCount" Guid="a0b10008-1d3c-467e-84e8-08ba76134dc0" Value="36" Type="int" />
+				<Parameter Name="Class" Guid="a0b10008-1d3c-467e-81bc-1796f686be51" Value="Logistics.ComponentAdvancedSorter" Type="string" />
+			</MemberComponentTemplate>
+		</EntityTemplate>
 	</Folder>
 	<!-- 与宿主 / IE2 共用 Project Guid，MemberSubsystemTemplate 才会并入世界 Project -->
 	<ProjectTemplate Name="Project" Guid="85023bf8-1c90-4dd1-9442-e6c13691d078">

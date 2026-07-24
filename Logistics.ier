@@ -7,6 +7,10 @@
 		"cbc"
 		"dad"
 	</Recipe>
+	<Recipe Result="AdvancedLogisticsDeviceBlock:16" ResultCount="1" RequiredHeatLevel="0" a="D-SorterDevice" b="I-BasicCircuit" c="andgate" d="I-ZincSheet" Description="[AdvancedSorter]">
+		"cbc"
+		"dad"
+	</Recipe>
 	<Recipe Result="LogisticsStorageUnitBlock:0" ResultCount="1" RequiredHeatLevel="0" a="I-ZincPlate" b="D-IronChestDevice" Description="[LogisticsStorageUnitChest]">
 		" a "
 		"aba"

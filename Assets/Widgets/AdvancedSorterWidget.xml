@@ -1,0 +1,30 @@
+<ChestNewWidget xmlns="runtime-namespace:Game">
+	<BevelledRectangleWidget Size="614, 382" BevelSize="3"/>
+	<LabelWidget CanvasWidget.Position="12, 14" Name="TitleLabel" Text="[AdvancedSorterWidget:1]" Color="255, 255, 255, 192"/>
+	<LabelWidget CanvasWidget.Position="306, 14" Name="InventoryLabel" Text="[AdvancedSorterWidget:2]" Color="255, 255, 255, 192"/>
+	<GridPanelWidget CanvasWidget.Position="306, 52" Name="InventoryGrid" ColumnsCount="4" RowsCount="4"/>
+
+	<!-- 左栏高度 288 = 4×72 背包格，底边与 InventoryGrid 对齐 -->
+	<CanvasWidget CanvasWidget.Position="12, 52" Size="288, 288" ClampToBounds="true">
+		<StackPanelWidget Direction="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+			<StackPanelWidget Direction="Horizontal" HorizontalAlignment="Stretch" Margin="0, 0, 0, 8">
+				<BevelledButtonWidget Name="TabRed" Size="68, 52" Text="[AdvancedSorterWidget:6]" Margin="0, 0, 4, 0"/>
+				<BevelledButtonWidget Name="TabYellow" Size="68, 52" Text="[AdvancedSorterWidget:7]" Margin="0, 0, 4, 0"/>
+				<BevelledButtonWidget Name="TabGreen" Size="68, 52" Text="[AdvancedSorterWidget:8]" Margin="0, 0, 4, 0"/>
+				<BevelledButtonWidget Name="TabBlue" Size="68, 52" Text="[AdvancedSorterWidget:9]"/>
+			</StackPanelWidget>
+
+			<StackPanelWidget Direction="Horizontal" HorizontalAlignment="Stretch" Margin="0, 0, 0, 8">
+				<LabelWidget Name="FilterLabel" Text="[AdvancedSorterWidget:3]" Color="255, 255, 255, 192" VerticalAlignment="Center"/>
+				<CanvasWidget Size="Infinity, 0" HorizontalAlignment="Stretch"/>
+				<BevelledButtonWidget Name="FilterModeButton" Size="144, 48" Text="" VerticalAlignment="Center"/>
+			</StackPanelWidget>
+
+			<CanvasWidget Size="Infinity, Infinity" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ClampToBounds="true">
+				<LogisticsScrollPanelWidget xmlns="runtime-namespace:Logistics" Direction="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+					<GridPanelWidget xmlns="runtime-namespace:Game" Name="ItemGrid" ColumnsCount="3" RowsCount="3" HorizontalAlignment="Center"/>
+				</LogisticsScrollPanelWidget>
+			</CanvasWidget>
+		</StackPanelWidget>
+	</CanvasWidget>
+</ChestNewWidget>
