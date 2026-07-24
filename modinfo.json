@@ -8,6 +8,6 @@
   "Author": "Industrial Era 2",
   "PackageName": "com.ie2.logistics",
   "Dependencies": {
-    "com.IndustrialEra2": "1.0.0.0"
+    "com.IndustrialEra2": "1.0.0.1"
   }
 }
