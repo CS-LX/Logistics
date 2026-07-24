@@ -4,7 +4,7 @@
 	<LabelWidget CanvasWidget.Position="16, 14" Name="VaultLabel" Text="[StorageVaultWidget:1]" Color="255, 255, 255, 192"/>
 	<LabelWidget CanvasWidget.Position="608, 14" Name="InventoryLabel" Text="[StorageVaultWidget:2]" Color="255, 255, 255, 192"/>
 	<GridPanelWidget CanvasWidget.Position="16, 52" Name="VaultGrid" ColumnsCount="6" RowsCount="4"/>
-	<CanvasWidget CanvasWidget.Position="456, 52" Size="144, 288">
+	<CanvasWidget CanvasWidget.Position="456, 52" Name="PageControls" Size="144, 288">
 		<StackPanelWidget Direction="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
 			<StackPanelWidget Direction="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
 				<BevelledButtonWidget Name="PreviousPageButton" Style="{Styles/ButtonStyle_ArrowUp}" HorizontalAlignment="Center"/>

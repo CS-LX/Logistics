@@ -2,10 +2,11 @@ using System.Xml.Linq;
 using Engine;
 using Game;
 using GameEntitySystem;
+using SCIENEW;
 
 namespace Logistics {
-    /// <summary>储存库 UI：左库右背包；中间电容式翻页（+/- 与竖滑条）。</summary>
-    public class StorageVaultWidget : CanvasWidget {
+    /// <summary>储存库 UI：左库右背包；中间翻页（箭头 / 滑条 / 悬停滚轮）；记住每库上次页码。</summary>
+    public class StorageVaultWidget : CanvasWidget, IRemovedActionWidget {
         public const int PageColumns = 6;
         public const int PageRows = 4;
         public const int PageSize = PageColumns * PageRows;
@@ -13,6 +14,7 @@ namespace Logistics {
         readonly ComponentStorageUnit m_unit;
         readonly GridPanelWidget m_vaultGrid;
         readonly GridPanelWidget m_inventoryGrid;
+        readonly ContainerWidget m_pageControls;
         readonly ButtonWidget m_previousPageButton;
         readonly ButtonWidget m_nextPageButton;
         readonly LabelWidget m_pageLabel;
@@ -31,11 +33,15 @@ namespace Logistics {
             LoadContents(this, node);
             m_vaultGrid = Children.Find<GridPanelWidget>("VaultGrid");
             m_inventoryGrid = Children.Find<GridPanelWidget>("InventoryGrid");
+            m_pageControls = Children.Find<ContainerWidget>("PageControls");
             m_previousPageButton = Children.Find<ButtonWidget>("PreviousPageButton");
             m_nextPageButton = Children.Find<ButtonWidget>("NextPageButton");
             m_pageLabel = Children.Find<LabelWidget>("PageLabel");
             m_pageSlider = Children.Find<SliderWidget>("PageSlider");
             m_pageSlider.Children.Find<RectangleWidget>("Slider.Rectangle").Size = new Vector2(6f, float.PositiveInfinity);
+            if (m_unit.TryResolveVault(out StorageVault vault)) {
+                m_pageIndex = ClampPageIndex(vault.LastUiPageIndex, vault.SlotsCount);
+            }
             RebuildPage();
             int num = 10;
             for (int row = 0; row < m_inventoryGrid.RowsCount; row++) {
@@ -50,8 +56,15 @@ namespace Logistics {
 
         static int PageCount(int slotsCount) => Math.Max(1, (Math.Max(0, slotsCount) + PageSize - 1) / PageSize);
 
+        static int ClampPageIndex(int pageIndex, int slotsCount)
+            => Math.Clamp(pageIndex, 0, PageCount(slotsCount) - 1);
+
         void ClampPage(int slotsCount) {
-            m_pageIndex = Math.Clamp(m_pageIndex, 0, PageCount(slotsCount) - 1);
+            m_pageIndex = ClampPageIndex(m_pageIndex, slotsCount);
+        }
+
+        void RememberPage(StorageVault vault) {
+            vault.LastUiPageIndex = ClampPageIndex(m_pageIndex, vault.SlotsCount);
         }
 
         void SyncPageChrome(int pageCount) {
@@ -87,7 +100,18 @@ namespace Logistics {
                 return;
             }
 
-            ClampPage(vault.SlotsCount);
+            // 簇变动（容量/Guid）：页码 = min(上次页, 新末页)
+            if (vault.Id != m_boundVaultId || vault.SlotsCount != m_boundSlots) {
+                if (vault.Id != m_boundVaultId) {
+                    m_pageIndex = vault.LastUiPageIndex;
+                }
+                ClampPage(vault.SlotsCount);
+                RememberPage(vault);
+            }
+            else {
+                ClampPage(vault.SlotsCount);
+            }
+
             int pageCount = PageCount(vault.SlotsCount);
             int baseIndex = m_pageIndex * PageSize;
             int index = 0;
@@ -106,11 +130,21 @@ namespace Logistics {
             m_boundVaultId = vault.Id;
             m_boundUnitGuid = m_unit.VaultGuid;
             m_displayedPage = m_pageIndex;
+            RememberPage(vault);
             SyncPageChrome(pageCount);
         }
 
         void Close() {
+            if (m_unit.TryResolveVault(out StorageVault vault)) {
+                RememberPage(vault);
+            }
             ParentWidget?.Children.Remove(this);
+        }
+
+        public void OnRemoved() {
+            if (m_unit.TryResolveVault(out StorageVault vault)) {
+                RememberPage(vault);
+            }
         }
 
         public override void Update() {
@@ -123,6 +157,13 @@ namespace Logistics {
                 return;
             }
 
+            // 悬停翻页区滚轮翻页（对齐创造背包 / 家具面板：Scroll.Z）
+            if (Input.Scroll.HasValue) {
+                Widget hit = HitTestGlobal(Input.Scroll.Value.XY);
+                if (hit != null && (hit == m_pageControls || hit.IsChildWidgetOf(m_pageControls))) {
+                    m_pageIndex -= (int)Input.Scroll.Value.Z;
+                }
+            }
             if (m_previousPageButton.IsClicked) {
                 m_pageIndex--;
             }
@@ -142,6 +183,7 @@ namespace Logistics {
                 RebuildPage();
             }
             else {
+                RememberPage(vault);
                 SyncPageChrome(PageCount(vault.SlotsCount));
             }
         }

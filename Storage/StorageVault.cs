@@ -18,6 +18,9 @@ namespace Logistics {
         public int Version { get; private set; }
         public bool NeedsCompact { get; private set; }
 
+        /// <summary>玩家上次打开 UI 时的页码（0-based）；簇缩容后由 UI 夹到合法页。</summary>
+        public int LastUiPageIndex { get; set; }
+
         readonly List<ComponentInventoryBase.Slot> m_slots = [];
         readonly Engine.Random m_random = new();
 
@@ -215,6 +218,7 @@ namespace Logistics {
             CompactIfNeeded();
             valuesDictionary.SetValue("Id", Id);
             valuesDictionary.SetValue("MemberCount", MemberCount);
+            valuesDictionary.SetValue("LastUiPageIndex", LastUiPageIndex);
             valuesDictionary.SetValue("SlotsCount", m_slots.Count);
             ValuesDictionary slots = new();
             valuesDictionary.SetValue("Slots", slots);
@@ -232,6 +236,7 @@ namespace Logistics {
             Guid id = valuesDictionary.GetValue<Guid>("Id");
             int memberCount = valuesDictionary.GetValue("MemberCount", 1);
             var vault = new StorageVault(id, memberCount);
+            vault.LastUiPageIndex = Math.Max(0, valuesDictionary.GetValue("LastUiPageIndex", 0));
             int slotsCount = valuesDictionary.GetValue("SlotsCount", vault.Capacity);
             vault.EnsureSlotCount(Math.Max(slotsCount, vault.Capacity));
             ValuesDictionary slots = valuesDictionary.GetValue<ValuesDictionary>("Slots", null);
