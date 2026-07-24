@@ -3,103 +3,171 @@
   <asset>
     <contributor>
       <author>Blender User</author>
-      <authoring_tool>Blender 3.6.5 commit date:2023-10-16, commit time:14:30, hash:cf1e1ed46b7e</authoring_tool>
+      <authoring_tool>Blender 4.5.12 LTS commit date:2026-07-20, commit time:13:37, hash:84afd5f785f7</authoring_tool>
     </contributor>
-    <created>2023-11-10T19:57:07</created>
-    <modified>2023-11-10T19:57:07</modified>
+    <created>2026-07-24T18:42:30</created>
+    <modified>2026-07-24T18:42:30</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
-  <library_images/>
+  <library_effects>
+    <effect id="材质2-effect">
+      <profile_COMMON>
+        <newparam sid="ConveyerBelt_png-surface">
+          <surface type="2D">
+            <init_from>ConveyerBelt_png</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="ConveyerBelt_png-sampler">
+          <sampler2D>
+            <source>ConveyerBelt_png-surface</source>
+          </sampler2D>
+        </newparam>
+        <technique sid="common">
+          <lambert>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <diffuse>
+              <texture texture="ConveyerBelt_png-sampler" texcoord="Flat_001-mesh-map-0"/>
+            </diffuse>
+            <index_of_refraction>
+              <float sid="ior">1.5</float>
+            </index_of_refraction>
+          </lambert>
+        </technique>
+      </profile_COMMON>
+    </effect>
+    <effect id="材质-effect">
+      <profile_COMMON>
+        <newparam sid="ConveyerBelt_png-surface">
+          <surface type="2D">
+            <init_from>ConveyerBelt_png</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="ConveyerBelt_png-sampler">
+          <sampler2D>
+            <source>ConveyerBelt_png-surface</source>
+          </sampler2D>
+        </newparam>
+        <technique sid="common">
+          <lambert>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <diffuse>
+              <texture texture="ConveyerBelt_png-sampler" texcoord="Flat-mesh-map-0"/>
+            </diffuse>
+            <index_of_refraction>
+              <float sid="ior">1.5</float>
+            </index_of_refraction>
+          </lambert>
+        </technique>
+      </profile_COMMON>
+    </effect>
+  </library_effects>
+  <library_images>
+    <image id="ConveyerBelt_png" name="ConveyerBelt_png">
+      <init_from>/E:/SCIE/industrial-era-2/Addons/Logistics/Assets/Textures/ConveyerBelt/ConveyerBelt.png</init_from>
+    </image>
+  </library_images>
+  <library_materials>
+    <material id="材质2-material" name="材质2">
+      <instance_effect url="#材质2-effect"/>
+    </material>
+    <material id="材质-material" name="材质">
+      <instance_effect url="#材质-effect"/>
+    </material>
+  </library_materials>
   <library_geometries>
-    <geometry id="Flat_003-mesh" name="Flat.003">
+    <geometry id="Belt_Rise-mesh" name="Belt_Rise">
       <mesh>
-        <source id="Flat_003-mesh-positions">
-          <float_array id="Flat_003-mesh-positions-array" count="24">-0.4568623 -0.5 0.02493429 -0.4568623 -0.5 0.1849343 -0.4568623 0.5 1.025 -0.4568623 0.5 1.185 0.4568623 -0.5 0.02493429 0.4568623 -0.5 0.1849343 0.4568623 0.5 1.185 0.4568623 0.5 1.025</float_array>
+        <source id="Belt_Rise-mesh-positions">
+          <float_array id="Belt_Rise-mesh-positions-array" count="24">0.4568621 0.5000002 0.02499997 0.4568621 0.5000002 0.185 0.4568625 -0.4999998 1.025 0.4568625 -0.4999998 1.185 -0.4568625 0.4999998 0.02499997 -0.4568625 0.4999998 0.185 -0.4568621 -0.5000002 1.185 -0.4568621 -0.5000002 1.025</float_array>
           <technique_common>
-            <accessor source="#Flat_003-mesh-positions-array" count="8" stride="3">
+            <accessor source="#Belt_Rise-mesh-positions-array" count="8" stride="3">
               <param name="X" type="float"/>
               <param name="Y" type="float"/>
               <param name="Z" type="float"/>
             </accessor>
           </technique_common>
         </source>
-        <source id="Flat_003-mesh-normals">
-          <float_array id="Flat_003-mesh-normals-array" count="12">0 -0.7071301 0.7070835 0 0.7071301 -0.7070835 0 -1 0 0 1 0</float_array>
+        <source id="Belt_Rise-mesh-normals">
+          <float_array id="Belt_Rise-mesh-normals-array" count="24">-2.66611e-7 0.7071068 0.7071068 2.76759e-7 -0.7071068 -0.7071068 -2.76759e-7 0.7071068 0.7071068 -3.91396e-7 1 0 -3.91396e-7 1 0 2.62921e-7 -0.7071068 -0.7071068 3.91395e-7 -1 0 3.91396e-7 -1 0</float_array>
           <technique_common>
-            <accessor source="#Flat_003-mesh-normals-array" count="4" stride="3">
+            <accessor source="#Belt_Rise-mesh-normals-array" count="8" stride="3">
               <param name="X" type="float"/>
               <param name="Y" type="float"/>
               <param name="Z" type="float"/>
             </accessor>
           </technique_common>
         </source>
-        <source id="Flat_003-mesh-map-0">
-          <float_array id="Flat_003-mesh-map-0-array" count="48">0.4979541 0.2514876 0.4979542 0.7480763 0.001290023 0.7480764 0.002007961 0.7477563 0.4986719 0.2511674 0.498672 0.7477561 0.4979541 0.2514876 0.001290023 0.7480764 0.001290023 0.2514876 0.4986719 0.3191192 0.002007842 0.252506 0.4986719 0.2525059 0.4986719 0.3191192 0.002007842 0.3191193 0.002007842 0.252506 0.002007961 0.7477563 0.002007842 0.2511675 0.4986719 0.2511674 0.4979541 0.252826 0.4979541 0.3194394 0.001290023 0.3194394 0.001290023 0.252826 0.4979541 0.252826 0.001290023 0.3194394</float_array>
+        <source id="Belt_Rise-mesh-map-0">
+          <float_array id="Belt_Rise-mesh-map-0-array" count="48">0.4979541 0.2514876 0.4979542 0.7480763 0.001290023 0.7480764 0.002007961 0.7477563 0.4986719 0.2511674 0.498672 0.7477561 0.4979541 0.2514876 0.001290023 0.7480764 0.001290023 0.2514876 0.4986719 0.3191192 0.002007842 0.252506 0.4986719 0.2525059 0.4986719 0.3191192 0.002007842 0.3191193 0.002007842 0.252506 0.002007961 0.7477563 0.002007842 0.2511675 0.4986719 0.2511674 0.4979541 0.6828973 0.4979541 0.7495107 0.001290023 0.7495107 0.001290023 0.6828973 0.4979541 0.6828973 0.001290023 0.7495107</float_array>
           <technique_common>
-            <accessor source="#Flat_003-mesh-map-0-array" count="24" stride="2">
+            <accessor source="#Belt_Rise-mesh-map-0-array" count="24" stride="2">
               <param name="S" type="float"/>
               <param name="T" type="float"/>
             </accessor>
           </technique_common>
         </source>
-        <vertices id="Flat_003-mesh-vertices">
-          <input semantic="POSITION" source="#Flat_003-mesh-positions"/>
+        <vertices id="Belt_Rise-mesh-vertices">
+          <input semantic="POSITION" source="#Belt_Rise-mesh-positions"/>
         </vertices>
-        <triangles count="8">
-          <input semantic="VERTEX" source="#Flat_003-mesh-vertices" offset="0"/>
-          <input semantic="NORMAL" source="#Flat_003-mesh-normals" offset="1"/>
-          <input semantic="TEXCOORD" source="#Flat_003-mesh-map-0" offset="2" set="0"/>
-          <p>3 0 0 1 0 1 5 0 2 7 1 3 0 1 4 2 1 5 3 0 6 5 0 7 6 0 8 0 2 9 5 2 10 1 2 11 0 2 12 4 2 13 5 2 14 7 1 15 4 1 16 0 1 17 2 3 18 3 3 19 6 3 20 7 3 21 2 3 22 6 3 23</p>
+        <triangles material="材质2-material" count="8">
+          <input semantic="VERTEX" source="#Belt_Rise-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Belt_Rise-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#Belt_Rise-mesh-map-0" offset="2" set="0"/>
+          <p>3 0 0 1 0 1 5 0 2 7 1 3 0 1 4 2 1 5 3 2 6 5 2 7 6 2 8 0 3 9 5 3 10 1 3 11 0 4 12 4 4 13 5 4 14 7 5 15 4 5 16 0 5 17 2 6 18 3 6 19 6 6 20 7 7 21 2 7 22 6 7 23</p>
         </triangles>
       </mesh>
     </geometry>
-    <geometry id="Flat_002-mesh" name="Flat.002">
+    <geometry id="Rise-mesh" name="Rise">
       <mesh>
-        <source id="Flat_002-mesh-positions">
-          <float_array id="Flat_002-mesh-positions-array" count="72">-0.4568623 -0.5 0.02493429 -0.4568623 -0.5 0.1849343 -0.4568623 0.5 1.025 -0.4568623 0.5 1.185 0.4568623 -0.5 0.02493429 0.4568623 -0.5 0.1849343 0.4568623 0.5 1.185 0.4568623 0.5 1.025 -0.5 0.5 1.004618 -0.5 -0.5 0.004552245 -0.5 -0.5 0.2053163 -0.5 0.5 1.205382 0.5 -0.5 0.004552245 0.5 0.5 1.004618 0.5 0.5 1.205382 0.5 -0.5 0.2053163 -0.4568623 0.5 1.004618 -0.4568623 -0.5 0.004552245 -0.4568623 -0.5 0.2053163 -0.4568623 0.5 1.205382 0.4568623 -0.5 0.004552245 0.4568623 0.5 1.004618 0.4568623 0.5 1.205382 0.4568623 -0.5 0.2053163</float_array>
+        <source id="Rise-mesh-positions">
+          <float_array id="Rise-mesh-positions-array" count="72">0.4568622 0.5000001 0.02499997 0.4568622 0.5000001 0.185 0.4568625 -0.4999998 1.025 0.4568625 -0.4999998 1.185 -0.4568625 0.4999998 0.02499997 -0.4568625 0.4999998 0.185 -0.4568622 -0.5000001 1.185 -0.4568622 -0.5000001 1.025 0.5000002 -0.4999998 1.004618 0.4999998 0.5000002 0.004617929 0.4999998 0.5000002 0.205382 0.5000002 -0.4999998 1.205382 -0.5000002 0.4999998 0.004617929 -0.4999998 -0.5000002 1.004618 -0.4999998 -0.5000002 1.205382 -0.5000002 0.4999998 0.205382 0.4568625 -0.4999998 1.004618 0.4568622 0.5000001 0.004617929 0.4568622 0.5000001 0.205382 0.4568625 -0.4999998 1.205382 -0.4568625 0.4999998 0.004617929 -0.4568622 -0.5000001 1.004618 -0.4568622 -0.5000001 1.205382 -0.4568625 0.4999998 0.205382</float_array>
           <technique_common>
-            <accessor source="#Flat_002-mesh-positions-array" count="24" stride="3">
+            <accessor source="#Rise-mesh-positions-array" count="24" stride="3">
               <param name="X" type="float"/>
               <param name="Y" type="float"/>
               <param name="Z" type="float"/>
             </accessor>
           </technique_common>
         </source>
-        <source id="Flat_002-mesh-normals">
-          <float_array id="Flat_002-mesh-normals-array" count="33">0 -1 0 0 0.70713 -0.7070836 1 0 0 0 -0.70713 0.7070836 -1 7.31092e-7 0 -1 0 0 -1 0 0 1 -6.39706e-7 0 1 2.65021e-6 0 0 1 0 -1 2.92437e-6 0</float_array>
+        <source id="Rise-mesh-normals">
+          <float_array id="Rise-mesh-normals-array" count="75">0 -1 0 1.38173e-6 -1 0 -1.38173e-6 1 0 -1 3.65546e-7 0 1 0 0 0 1 0 -1.38173e-6 1 0 0 0.7071068 0.7071068 -1 -4.45334e-7 0 1 5.93778e-7 0 0 -0.7071063 -0.7071073 -1.38173e-6 1 0 1.38174e-6 -1 0 1.38172e-6 -1 0 -1 0 0 1.38173e-6 -1 0 1 -5.48319e-7 0 4.01329e-7 0.7071066 0.7071071 -1 -2.96889e-7 0 1 2.22667e-7 0 0 -0.7071071 -0.7071065 -2.35539e-6 0.7071066 0.7071071 1.96308e-6 -0.7071071 -0.7071065 1 9.13866e-7 0 -1.38173e-6 1 0</float_array>
           <technique_common>
-            <accessor source="#Flat_002-mesh-normals-array" count="11" stride="3">
+            <accessor source="#Rise-mesh-normals-array" count="25" stride="3">
               <param name="X" type="float"/>
               <param name="Y" type="float"/>
               <param name="Z" type="float"/>
             </accessor>
           </technique_common>
         </source>
-        <source id="Flat_002-mesh-map-0">
-          <float_array id="Flat_002-mesh-map-0-array" count="216">0.4982424 0.1687082 0.4704285 0.05240309 0.4982424 0.0655449 0.470224 0.0655449 0.498038 0.05240309 0.498038 0.1818498 0.4704285 0.05240309 0.4982424 0.05240309 0.4982424 0.0655449 0.00860244 0.2243448 0.00860244 0.2453234 0.4949188 0.2453234 0.470224 0.0655449 0.498038 0.1818498 0.470224 0.1687082 0.004568994 0.005483567 0.4977368 0.2463434 0.4977368 0.005483567 0.498038 0.1818498 0.470224 0.1818498 0.470224 0.1687082 0.4982424 0.1818498 0.4704285 0.1818498 0.4982424 0.1687082 0.004568994 0.005483567 0.004568994 0.2463434 0.4977368 0.2463434 0.4949188 0.2464525 0.4949188 0.2254739 0.00860244 0.2254739 0.00860244 0.2243448 0.4949188 0.2453234 0.4949188 0.2243448 0.4949188 0.2243448 0.00860244 0.2453234 0.00860244 0.2243448 0.4949188 0.2464525 0.00860244 0.2254739 0.00860244 0.2464525 0.00860244 0.2464525 0.4949188 0.2254739 0.4949188 0.2464525 0.003849506 0.2465038 0.4970086 0.2207368 0.4970086 0.2465038 0.004568994 0.2463434 0.4977368 0.005483567 0.4977368 0.2463434 0.4970086 0.2213225 0.003849506 0.2470897 0.003849506 0.2213225 0.4704285 0.1818498 0.4704285 0.05240309 0.4982424 0.1687082 0.4970086 0.2465038 0.003849506 0.2207368 0.003849506 0.2465038 0.003849506 0.2465038 0.003849506 0.2207368 0.4970086 0.2207368 0.00860244 0.2464525 0.00860244 0.2254739 0.4949188 0.2254739 0.003849506 0.2213225 0.4970086 0.2470897 0.4970086 0.2213225 0.4949188 0.2243448 0.4949188 0.2453234 0.00860244 0.2453234 0.470224 0.1687081 0.498038 0.05240297 0.470224 0.06554466 0.470224 0.0655449 0.470224 0.05240309 0.498038 0.05240309 0.004568994 0.2463434 0.004568994 0.005483567 0.4977368 0.005483567 0.4970086 0.2213225 0.4970086 0.2470897 0.003849506 0.2470897 0.4970086 0.2465038 0.4970086 0.2207368 0.003849506 0.2207368 0.003849506 0.2213225 0.003849506 0.2470897 0.4970086 0.2470897 0.4982424 0.06554466 0.4982424 0.05240297 0.4704285 0.05240297 0.4704285 0.05240297 0.4704285 0.1818498 0.4982424 0.1687081 0.4704285 0.1818498 0.4982424 0.1818498 0.4982424 0.1687081 0.4982424 0.06554466 0.4704285 0.05240297 0.4982424 0.1687081 0.470224 0.1687081 0.470224 0.1818498 0.498038 0.1818498 0.498038 0.05240297 0.470224 0.05240297 0.470224 0.06554466 0.470224 0.1687081 0.498038 0.1818498 0.498038 0.05240297</float_array>
+        <source id="Rise-mesh-map-0">
+          <float_array id="Rise-mesh-map-0-array" count="216">0.46875 0.15625 0.5 0.234375 0.5 0.171875 0.5 0.25 0.46875 0.171875 0.46875 0.234375 0.46875 0.15625 0.5 0.15625 0.5 0.171875 0.5 0.25 0 0.21875 0 0.25 0 0.21875 0.5 0.25 0 0.25 0.4690046 0.15625 0.4997693 0.15625 0.4997693 0.1689403 0.5 0.25 0.46875 0.25 0.5 0.234375 0.5 0.25 0 0.21875 0.5 0.21875 0.4997693 0.1689403 0.4690046 0.25 0.4690046 0.15625 0.5 0.15625 0 0.25 0 0.15625 0 0.15625 0.5 0.25 0 0.25 0.5 0.21875 0 0.25 0.5 0.25 0 0.21875 0.5 0.25 0 0.25 0 0.25 0.5 0.21875 0 0.21875 0.5 0.25 0 0.21875 0.5 0.21875 0.46875 0.25 0.5 0.171875 0.5 0.234375 0.4997693 0.2373096 0.4997693 0.25 0.4690046 0.25 0.5 0.171875 0.5 0.15625 0.46875 0.15625 0.46875 0.25 0.5 0.25 0.5 0.234375 0.46875 0.234375 0.46875 0.25 0.5 0.25 0.5 0.15625 0.46875 0.15625 0.46875 0.171875 0 0.21875 0.5 0.25 0.5 0.21875 0.4997693 0.1689403 0.4997693 0.2373096 0.4690046 0.25 0.46875 0.15625 0.46875 0.25 0.5 0.234375 0.5 0.25 0.5 0.15625 0.46875 0.171875 0.5 0.25 0.5 0.21875 0 0.21875 0 0.21875 0.5 0.21875 0.5 0.25 0.5 0.25 0 0.25 0 0.21875 0.5 0.15625 0.5 0.25 0 0.25 0 0.15625 0.5 0.15625 0.5 0.25 0.5 0.21875 0 0.21875 0 0.25 0 0.21875 0.5 0.21875 0.5 0.25 0 0.25 0.5 0.25 0.5 0.21875 0.5 0.25 0 0.25 0 0.21875 0.46875 0.25 0.46875 0.15625 0.5 0.171875 0 0.21875 0 0.25 0.5 0.25</float_array>
           <technique_common>
-            <accessor source="#Flat_002-mesh-map-0-array" count="108" stride="2">
+            <accessor source="#Rise-mesh-map-0-array" count="108" stride="2">
               <param name="S" type="float"/>
               <param name="T" type="float"/>
             </accessor>
           </technique_common>
         </source>
-        <vertices id="Flat_002-mesh-vertices">
-          <input semantic="POSITION" source="#Flat_002-mesh-positions"/>
+        <vertices id="Rise-mesh-vertices">
+          <input semantic="POSITION" source="#Rise-mesh-positions"/>
         </vertices>
-        <triangles count="36">
-          <input semantic="VERTEX" source="#Flat_002-mesh-vertices" offset="0"/>
-          <input semantic="NORMAL" source="#Flat_002-mesh-normals" offset="1"/>
-          <input semantic="TEXCOORD" source="#Flat_002-mesh-map-0" offset="2" set="0"/>
-          <p>1 0 0 9 0 1 0 0 2 4 0 3 12 0 4 15 0 5 9 0 6 17 0 7 0 0 8 17 1 9 9 1 10 8 1 11 4 0 12 15 0 13 5 0 14 13 2 15 15 2 16 12 2 17 15 0 18 23 0 19 5 0 20 18 0 21 10 0 22 1 0 23 13 2 24 14 2 25 15 2 26 21 1 27 13 1 28 12 1 29 17 1 30 8 1 31 16 1 32 19 3 33 10 3 34 18 3 35 21 1 36 12 1 37 20 1 38 23 3 39 14 3 40 22 3 41 7 4 42 20 4 43 4 4 44 11 5 45 9 5 46 10 5 47 5 6 48 22 6 49 6 6 50 10 0 51 9 0 52 1 0 53 0 7 54 16 7 55 2 7 56 7 5 57 21 5 58 20 5 59 23 3 60 15 3 61 14 3 62 3 8 63 18 8 64 1 8 65 19 3 66 11 3 67 10 3 68 6 9 69 13 9 70 7 9 71 4 0 72 20 0 73 12 0 74 11 5 75 8 5 76 9 5 77 5 10 78 23 10 79 22 10 80 0 2 81 17 2 82 16 2 83 3 2 84 19 2 85 18 2 86 2 9 87 16 9 88 8 9 89 8 9 90 11 9 91 3 9 92 11 9 93 19 9 94 3 9 95 2 9 96 8 9 97 3 9 98 6 9 99 22 9 100 14 9 101 13 9 102 21 9 103 7 9 104 6 9 105 14 9 106 13 9 107</p>
+        <triangles material="材质-material" count="36">
+          <input semantic="VERTEX" source="#Rise-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Rise-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#Rise-mesh-map-0" offset="2" set="0"/>
+          <p>8 0 0 3 0 1 2 0 2 14 1 3 7 1 4 6 1 5 9 2 6 17 2 7 0 2 8 0 3 9 16 3 10 2 3 11 21 4 12 4 4 13 7 4 14 15 5 15 23 5 16 5 5 17 18 6 18 10 6 19 1 6 20 11 7 21 18 7 22 19 7 23 5 5 24 12 5 25 15 5 26 13 8 27 15 8 28 12 8 29 8 9 30 10 9 31 11 9 32 16 10 33 9 10 34 8 10 35 15 7 36 22 7 37 23 7 38 20 10 39 13 10 40 12 10 41 23 4 42 6 4 43 5 4 44 10 11 45 0 11 46 1 11 47 4 5 48 20 5 49 12 5 50 2 0 51 16 0 52 8 0 53 11 0 54 19 0 55 3 0 56 6 12 57 22 12 58 14 12 59 13 13 60 21 13 61 7 13 62 3 14 63 18 14 64 1 14 65 5 5 66 4 5 67 12 5 68 8 0 69 11 0 70 3 0 71 14 15 72 13 15 73 7 15 74 0 14 75 17 14 76 16 14 77 21 16 78 20 16 79 4 16 80 11 17 81 10 17 82 18 17 83 13 18 84 14 18 85 15 18 86 8 19 87 9 19 88 10 19 89 16 20 90 17 20 91 9 20 92 15 21 93 14 21 94 22 21 95 20 22 96 21 22 97 13 22 98 23 23 99 22 23 100 6 23 101 10 24 102 9 24 103 0 24 104 3 14 105 19 14 106 18 14 107</p>
         </triangles>
       </mesh>
     </geometry>
     <geometry id="Flat_001-mesh" name="Flat.001">
       <mesh>
         <source id="Flat_001-mesh-positions">
-          <float_array id="Flat_001-mesh-positions-array" count="24">-0.4568623 -0.5 0.02499997 -0.4568623 -0.5 0.185 -0.4568623 0.5 0.02499997 -0.4568623 0.5 0.185 0.4568623 -0.5 0.02499997 0.4568623 -0.5 0.185 0.4568623 0.5 0.185 0.4568623 0.5 0.02499997</float_array>
+          <float_array id="Flat_001-mesh-positions-array" count="24">0.4568621 0.5000002 0.02499997 0.4568621 0.5000002 0.185 0.4568625 -0.4999998 0.02499997 0.4568625 -0.4999998 0.185 -0.4568625 0.4999998 0.02499997 -0.4568625 0.4999998 0.185 -0.4568621 -0.5000002 0.185 -0.4568621 -0.5000002 0.02499997</float_array>
           <technique_common>
             <accessor source="#Flat_001-mesh-positions-array" count="8" stride="3">
               <param name="X" type="float"/>
@@ -109,9 +177,9 @@
           </technique_common>
         </source>
         <source id="Flat_001-mesh-normals">
-          <float_array id="Flat_001-mesh-normals-array" count="12">0 0 1 0 0 -1 0 -1 0 0 1 0</float_array>
+          <float_array id="Flat_001-mesh-normals-array" count="24">0 0 1 0 0 -1 0 0 1 -3.91396e-7 1 0 -3.91396e-7 1 0 0 0 -1 3.91396e-7 -1 0 3.91396e-7 -1 0</float_array>
           <technique_common>
-            <accessor source="#Flat_001-mesh-normals-array" count="4" stride="3">
+            <accessor source="#Flat_001-mesh-normals-array" count="8" stride="3">
               <param name="X" type="float"/>
               <param name="Y" type="float"/>
               <param name="Z" type="float"/>
@@ -130,18 +198,18 @@
         <vertices id="Flat_001-mesh-vertices">
           <input semantic="POSITION" source="#Flat_001-mesh-positions"/>
         </vertices>
-        <triangles count="8">
+        <triangles material="材质2-material" count="8">
           <input semantic="VERTEX" source="#Flat_001-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Flat_001-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Flat_001-mesh-map-0" offset="2" set="0"/>
-          <p>3 0 0 1 0 1 5 0 2 7 1 3 0 1 4 2 1 5 3 0 6 5 0 7 6 0 8 0 2 9 5 2 10 1 2 11 0 2 12 4 2 13 5 2 14 7 1 15 4 1 16 0 1 17 2 3 18 3 3 19 6 3 20 7 3 21 2 3 22 6 3 23</p>
+          <p>3 0 0 1 0 1 5 0 2 7 1 3 0 1 4 2 1 5 3 2 6 5 2 7 6 2 8 0 3 9 5 3 10 1 3 11 0 4 12 4 4 13 5 4 14 7 5 15 4 5 16 0 5 17 2 6 18 3 6 19 6 6 20 7 7 21 2 7 22 6 7 23</p>
         </triangles>
       </mesh>
     </geometry>
     <geometry id="Flat-mesh" name="Flat">
       <mesh>
         <source id="Flat-mesh-positions">
-          <float_array id="Flat-mesh-positions-array" count="72">-0.4568623 -0.5 0.02499997 -0.4568623 -0.5 0.185 -0.4568623 0.5 0.02499997 -0.4568623 0.5 0.185 0.4568623 -0.5 0.02499997 0.4568623 -0.5 0.185 0.4568623 0.5 0.185 0.4568623 0.5 0.02499997 -0.5 0.5 0.004617929 -0.5 -0.5 0.004617929 -0.5 -0.5 0.205382 -0.5 0.5 0.205382 0.5 -0.5 0.004617929 0.5 0.5 0.004617929 0.5 0.5 0.205382 0.5 -0.5 0.205382 -0.4568623 0.5 0.004617929 -0.4568623 -0.5 0.004617929 -0.4568623 -0.5 0.205382 -0.4568623 0.5 0.205382 0.4568623 -0.5 0.004617929 0.4568623 0.5 0.004617929 0.4568623 0.5 0.205382 0.4568623 -0.5 0.205382</float_array>
+          <float_array id="Flat-mesh-positions-array" count="72">0.4568622 0.5000001 0.02499997 0.4568622 0.5000001 0.185 0.4568625 -0.4999998 0.02499997 0.4568625 -0.4999998 0.185 -0.4568625 0.4999998 0.02499997 -0.4568625 0.4999998 0.185 -0.4568622 -0.5000001 0.185 -0.4568622 -0.5000001 0.02499997 0.5000002 -0.4999998 0.004617929 0.4999998 0.5000002 0.004617929 0.4999998 0.5000002 0.205382 0.5000002 -0.4999998 0.205382 -0.5000002 0.4999998 0.004617929 -0.4999998 -0.5000002 0.004617929 -0.4999998 -0.5000002 0.205382 -0.5000002 0.4999998 0.205382 0.4568625 -0.4999998 0.004617929 0.4568622 0.5000001 0.004617929 0.4568622 0.5000001 0.205382 0.4568625 -0.4999998 0.205382 -0.4568625 0.4999998 0.004617929 -0.4568622 -0.5000001 0.004617929 -0.4568622 -0.5000001 0.205382 -0.4568625 0.4999998 0.205382</float_array>
           <technique_common>
             <accessor source="#Flat-mesh-positions-array" count="24" stride="3">
               <param name="X" type="float"/>
@@ -151,9 +219,9 @@
           </technique_common>
         </source>
         <source id="Flat-mesh-normals">
-          <float_array id="Flat-mesh-normals-array" count="18">0 -1 0 0 0 -1 1 0 0 0 0 1 -1 0 0 0 1 0</float_array>
+          <float_array id="Flat-mesh-normals-array" count="84">0 -1 0 1.38173e-6 -1 0 -1.38173e-6 1 0 -1 -2.7416e-7 0 1 2.7416e-7 0 0 1 0 -1.38173e-6 1 0 0 0 1 -1 -2.96889e-7 0 1 3.71111e-7 0 0 0 -1 1 2.74161e-7 0 -1.38173e-6 1 0 1.38173e-6 -1 0 1.38173e-6 -1 0 -1 -2.74161e-7 0 1.38173e-6 -1 0 -1 -3.65546e-7 0 1 3.65546e-7 0 5.67565e-7 0 1 -1 -3.71111e-7 0 1 2.96889e-7 0 0 0 -1 -5.67565e-7 0 1 0 0 -1 1 2.7416e-7 0 -1.38173e-6 1 0 -1 -2.7416e-7 0</float_array>
           <technique_common>
-            <accessor source="#Flat-mesh-normals-array" count="6" stride="3">
+            <accessor source="#Flat-mesh-normals-array" count="28" stride="3">
               <param name="X" type="float"/>
               <param name="Y" type="float"/>
               <param name="Z" type="float"/>
@@ -161,7 +229,7 @@
           </technique_common>
         </source>
         <source id="Flat-mesh-map-0">
-          <float_array id="Flat-mesh-map-0-array" count="216">0.4982424 0.1687082 0.4704285 0.05240309 0.4982424 0.0655449 0.470224 0.0655449 0.498038 0.05240309 0.498038 0.1818498 0.4704285 0.05240309 0.4982424 0.05240309 0.4982424 0.0655449 0.00860244 0.2243448 0.00860244 0.2453234 0.4949188 0.2453234 0.470224 0.0655449 0.498038 0.1818498 0.470224 0.1687082 0.004568994 0.005483567 0.4977368 0.2463434 0.4977368 0.005483567 0.498038 0.1818498 0.470224 0.1818498 0.470224 0.1687082 0.4982424 0.1818498 0.4704285 0.1818498 0.4982424 0.1687082 0.004568994 0.005483567 0.004568994 0.2463434 0.4977368 0.2463434 0.4949188 0.2464525 0.4949188 0.2254739 0.00860244 0.2254739 0.00860244 0.2243448 0.4949188 0.2453234 0.4949188 0.2243448 0.4949188 0.2243448 0.00860244 0.2453234 0.00860244 0.2243448 0.4949188 0.2464525 0.00860244 0.2254739 0.00860244 0.2464525 0.00860244 0.2464525 0.4949188 0.2254739 0.4949188 0.2464525 0.003849506 0.2465038 0.4970086 0.2207368 0.4970086 0.2465038 0.004568994 0.2463434 0.4977368 0.005483567 0.4977368 0.2463434 0.4970086 0.2213225 0.003849506 0.2470897 0.003849506 0.2213225 0.4704285 0.1818498 0.4704285 0.05240309 0.4982424 0.1687082 0.4970086 0.2465038 0.003849506 0.2207368 0.003849506 0.2465038 0.003849506 0.2465038 0.003849506 0.2207368 0.4970086 0.2207368 0.00860244 0.2464525 0.00860244 0.2254739 0.4949188 0.2254739 0.003849506 0.2213225 0.4970086 0.2470897 0.4970086 0.2213225 0.4949188 0.2243448 0.4949188 0.2453234 0.00860244 0.2453234 0.470224 0.1687081 0.498038 0.05240297 0.470224 0.06554466 0.470224 0.0655449 0.470224 0.05240309 0.498038 0.05240309 0.004568994 0.2463434 0.004568994 0.005483567 0.4977368 0.005483567 0.4970086 0.2213225 0.4970086 0.2470897 0.003849506 0.2470897 0.4970086 0.2465038 0.4970086 0.2207368 0.003849506 0.2207368 0.003849506 0.2213225 0.003849506 0.2470897 0.4970086 0.2470897 0.4982424 0.06554466 0.4982424 0.05240297 0.4704285 0.05240297 0.4704285 0.05240297 0.4704285 0.1818498 0.4982424 0.1687081 0.4704285 0.1818498 0.4982424 0.1818498 0.4982424 0.1687081 0.4982424 0.06554466 0.4704285 0.05240297 0.4982424 0.1687081 0.470224 0.1687081 0.470224 0.1818498 0.498038 0.1818498 0.498038 0.05240297 0.470224 0.05240297 0.470224 0.06554466 0.470224 0.1687081 0.498038 0.1818498 0.498038 0.05240297</float_array>
+          <float_array id="Flat-mesh-map-0-array" count="216">0.5 0.171875 0.46875 0.25 0.5 0.234375 0.5 0.25 0.46875 0.171875 0.46875 0.234375 0.46875 0.15625 0.5 0.15625 0.5 0.171875 0.5 0.21875 0 0.25 0.5 0.25 0 0.21875 0.5 0.25 0 0.25 0.5 0.25 0.46875 0.25 0.46875 0.234375 0.5 0.25 0.46875 0.25 0.5 0.234375 0.5 0.25 0 0.21875 0.5 0.21875 0.5 0.25 0.46875 0.171875 0.5 0.15625 0.5 0.25 0 0.15625 0.5 0.15625 0 0.15625 0.5 0.25 0 0.25 0.5 0.21875 0 0.25 0.5 0.25 0 0.21875 0.5 0.25 0 0.25 0 0.25 0.5 0.21875 0 0.21875 0.5 0.25 0 0.21875 0.5 0.21875 0.46875 0.25 0.5 0.171875 0.5 0.234375 0.46875 0.171875 0.46875 0.15625 0.5 0.15625 0.5 0.171875 0.5 0.15625 0.46875 0.15625 0.46875 0.25 0.5 0.25 0.5 0.234375 0.46875 0.234375 0.46875 0.25 0.5 0.25 0.5 0.15625 0.46875 0.15625 0.46875 0.171875 0 0.25 0.5 0.21875 0 0.21875 0.5 0.171875 0.46875 0.15625 0.46875 0.25 0.5 0.25 0.5 0.15625 0.46875 0.171875 0.5 0.21875 0 0.21875 0 0.25 0 0.21875 0.5 0.21875 0.5 0.25 0.5 0.25 0 0.25 0 0.21875 0.5 0.25 0.46875 0.234375 0.46875 0.171875 0.5 0.25 0 0.25 0 0.15625 0 0.15625 0.5 0.15625 0.5 0.25 0.5 0.21875 0 0.21875 0 0.25 0 0.21875 0.5 0.21875 0.5 0.25 0 0.25 0.5 0.25 0.5 0.21875 0.5 0.25 0 0.25 0 0.21875 0.46875 0.25 0.46875 0.15625 0.5 0.171875 0 0.25 0.5 0.25 0.5 0.21875</float_array>
           <technique_common>
             <accessor source="#Flat-mesh-map-0-array" count="108" stride="2">
               <param name="S" type="float"/>
@@ -172,11 +240,11 @@
         <vertices id="Flat-mesh-vertices">
           <input semantic="POSITION" source="#Flat-mesh-positions"/>
         </vertices>
-        <triangles count="36">
+        <triangles material="材质-material" count="36">
           <input semantic="VERTEX" source="#Flat-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Flat-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Flat-mesh-map-0" offset="2" set="0"/>
-          <p>1 0 0 9 0 1 0 0 2 4 0 3 12 0 4 15 0 5 9 0 6 17 0 7 0 0 8 17 1 9 9 1 10 8 1 11 4 0 12 15 0 13 5 0 14 13 2 15 15 2 16 12 2 17 15 0 18 23 0 19 5 0 20 18 0 21 10 0 22 1 0 23 13 2 24 14 2 25 15 2 26 21 1 27 13 1 28 12 1 29 17 1 30 8 1 31 16 1 32 19 3 33 10 3 34 18 3 35 21 1 36 12 1 37 20 1 38 23 3 39 14 3 40 22 3 41 7 4 42 20 4 43 4 4 44 11 4 45 9 4 46 10 4 47 5 4 48 22 4 49 6 4 50 10 0 51 9 0 52 1 0 53 0 2 54 16 2 55 2 2 56 7 4 57 21 4 58 20 4 59 23 3 60 15 3 61 14 3 62 3 2 63 18 2 64 1 2 65 19 3 66 11 3 67 10 3 68 6 5 69 13 5 70 7 5 71 4 0 72 20 0 73 12 0 74 11 4 75 8 4 76 9 4 77 5 4 78 23 4 79 22 4 80 0 2 81 17 2 82 16 2 83 3 2 84 19 2 85 18 2 86 2 5 87 16 5 88 8 5 89 8 5 90 11 5 91 3 5 92 11 5 93 19 5 94 3 5 95 2 5 96 8 5 97 3 5 98 6 5 99 22 5 100 14 5 101 13 5 102 21 5 103 7 5 104 6 5 105 14 5 106 13 5 107</p>
+          <p>2 0 0 11 0 1 3 0 2 14 1 3 7 1 4 6 1 5 9 2 6 17 2 7 0 2 8 17 3 9 2 3 10 0 3 11 21 4 12 4 4 13 7 4 14 15 5 15 23 5 16 5 5 17 18 6 18 10 6 19 1 6 20 11 7 21 18 7 22 19 7 23 15 5 24 4 5 25 12 5 26 14 8 27 12 8 28 13 8 29 8 9 30 10 9 31 11 9 32 16 10 33 9 10 34 8 10 35 15 7 36 22 7 37 23 7 38 20 10 39 13 10 40 12 10 41 23 11 42 6 11 43 5 11 44 10 12 45 0 12 46 1 12 47 4 5 48 20 5 49 12 5 50 2 0 51 16 0 52 8 0 53 11 0 54 19 0 55 3 0 56 6 13 57 22 13 58 14 13 59 13 14 60 21 14 61 7 14 62 19 15 63 1 15 64 3 15 65 2 0 66 8 0 67 11 0 68 14 16 69 13 16 70 7 16 71 17 17 72 16 17 73 2 17 74 21 18 75 20 18 76 4 18 77 11 19 78 10 19 79 18 19 80 15 5 81 5 5 82 4 5 83 14 20 84 15 20 85 12 20 86 8 21 87 9 21 88 10 21 89 16 22 90 17 22 91 9 22 92 15 23 93 14 23 94 22 23 95 20 24 96 21 24 97 13 24 98 23 25 99 22 25 100 6 25 101 10 26 102 9 26 103 0 26 104 19 27 105 18 27 106 1 27 107</p>
         </triangles>
       </mesh>
     </geometry>
@@ -184,19 +252,51 @@
   <library_visual_scenes>
     <visual_scene id="Scene" name="Scene">
       <node id="Rise" name="Rise" type="NODE">
-        <matrix sid="transform">1 0 0 0 0 7.54979e-8 1 0 0 -1 7.54979e-8 0 0 0 0 1</matrix>
-        <instance_geometry url="#Flat_002-mesh" name="Rise"/>
+        <matrix sid="transform">-1 0 0 0 0 0 1 0 0 1 0 0 0 0 0 1</matrix>
+        <instance_geometry url="#Rise-mesh" name="Rise">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="材质-material" target="#材质-material">
+                <bind_vertex_input semantic="Flat-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
         <node id="Belt_Rise" name="Belt_Rise" type="NODE">
-          <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-          <instance_geometry url="#Flat_003-mesh" name="Belt_Rise"/>
+          <matrix sid="transform">-1 0 0 0 0 0 1 0 0 1 0 0 0 0 0 1</matrix>
+          <instance_geometry url="#Belt_Rise-mesh" name="Belt_Rise">
+            <bind_material>
+              <technique_common>
+                <instance_material symbol="材质2-material" target="#材质2-material">
+                  <bind_vertex_input semantic="Flat_001-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
+                </instance_material>
+              </technique_common>
+            </bind_material>
+          </instance_geometry>
         </node>
       </node>
       <node id="Flat" name="Flat" type="NODE">
-        <matrix sid="transform">1 0 0 0 0 7.54979e-8 1 0 0 -1 7.54979e-8 0 0 0 0 1</matrix>
-        <instance_geometry url="#Flat-mesh" name="Flat"/>
+        <matrix sid="transform">-1 0 0 0 0 0 1 0 0 1 0 0 0 0 0 1</matrix>
+        <instance_geometry url="#Flat-mesh" name="Flat">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="材质-material" target="#材质-material">
+                <bind_vertex_input semantic="Flat-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
         <node id="Belt_Flat" name="Belt_Flat" type="NODE">
-          <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-          <instance_geometry url="#Flat_001-mesh" name="Belt_Flat"/>
+          <matrix sid="transform">-1 0 0 0 0 0 1 0 0 1 0 0 0 0 0 1</matrix>
+          <instance_geometry url="#Flat_001-mesh" name="Belt_Flat">
+            <bind_material>
+              <technique_common>
+                <instance_material symbol="材质2-material" target="#材质2-material">
+                  <bind_vertex_input semantic="Flat_001-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
+                </instance_material>
+              </technique_common>
+            </bind_material>
+          </instance_geometry>
         </node>
       </node>
     </visual_scene>
