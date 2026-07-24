@@ -4,7 +4,7 @@ using TemplatesDatabase;
 namespace Logistics {
     /// <summary>挂在 Group 上的连续物流表（按 BeltPosition 有序）。</summary>
     public sealed class BeltInventory {
-        public const float Spacing = 0.25f;
+        public const float Spacing = 0.32f;
 
         readonly List<TransportedItem> m_items = [];
 
