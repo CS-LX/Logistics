@@ -7,7 +7,7 @@
   },
   "LogisticsStorageUnitBlock": {
     "DisplayName": "物流存储单元",
-    "Description": "可连通扩展的存储方块。相邻单元共享同一储存库；右键打开库界面。"
+    "Description": "可连通扩展的存储方块。贴着放置会并入同一储存库，库容随相连数量增加；右键打开，物品多时可翻页。抓取机可从侧面自动存取。"
   },
   "ContentWidgets": {
     "AdvancedInserterWidget": {

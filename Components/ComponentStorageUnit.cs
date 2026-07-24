@@ -1,13 +1,14 @@
 using Engine;
 using Game;
 using GameEntitySystem;
+using SCIENEW.ProductionIO;
 using TemplatesDatabase;
 
 namespace Logistics {
     /// <summary>
     /// 储存单元：持有 <see cref="VaultGuid"/>，对外实现 <see cref="IInventory"/> 并转发到储存库。
     /// </summary>
-    public class ComponentStorageUnit : Component, IInventory {
+    public class ComponentStorageUnit : Component, IInventory, IInventoryProductionSlots {
         public Guid VaultGuid { get; set; }
 
         ComponentBlockEntity m_componentBlockEntity;
@@ -38,10 +39,30 @@ namespace Logistics {
             m_componentBlockEntity = Entity.FindComponent<ComponentBlockEntity>(true);
             VaultGuid = valuesDictionary.GetValue("VaultGuid", Guid.Empty);
             m_componentBlockEntity.m_inventoryToGatherPickable = this;
+            if (VaultGuid != Guid.Empty) {
+                m_subsystemStorageVaults.RememberCell(m_componentBlockEntity.Coordinates, VaultGuid);
+            }
         }
 
         public override void Save(ValuesDictionary valuesDictionary, EntityToIdMap entityToIdMap) {
             valuesDictionary.SetValue("VaultGuid", VaultGuid);
+        }
+
+        /// <summary>
+        /// 出料：只枚举非空槽，避免抓取机扫完整库容量；进料让位给 AcquireItems 全库紧密装入。
+        /// </summary>
+        public IEnumerable<int> GetSlotIndices(ProductionSlotKind kind) {
+            if (kind != ProductionSlotKind.Output) {
+                yield break;
+            }
+            if (!TryResolveVault(out StorageVault vault)) {
+                yield break;
+            }
+            for (int i = 0; i < vault.SlotsCount; i++) {
+                if (vault.GetSlotCount(i) > 0) {
+                    yield return i;
+                }
+            }
         }
 
         public int GetSlotValue(int slotIndex)

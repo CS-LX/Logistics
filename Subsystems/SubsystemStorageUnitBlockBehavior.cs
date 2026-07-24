@@ -54,6 +54,16 @@ namespace Logistics {
                 // 读档缺库时恢复：并入邻簇或新建，避免孤立空 Guid
                 m_subsystemStorageVaults.IntegrateNewUnit(unit, point);
             }
+            else {
+                m_subsystemStorageVaults.RememberCell(point, unit.VaultGuid);
+            }
+            // 跨区块邻接：区块生成后防抖合并多 Guid 几何簇
+            m_subsystemStorageVaults.RequestRebuild(point);
+        }
+
+        public override void OnNeighborBlockChanged(int x, int y, int z, int neighborX, int neighborY, int neighborZ) {
+            m_subsystemStorageVaults.RequestRebuild(new Point3(x, y, z));
+            m_subsystemStorageVaults.RequestRebuild(new Point3(neighborX, neighborY, neighborZ));
         }
 
         public override bool OnInteract(TerrainRaycastResult raycastResult, ComponentMiner componentMiner) {
