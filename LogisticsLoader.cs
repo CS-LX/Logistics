@@ -18,6 +18,7 @@ namespace Logistics {
 
         public override void OnLoadingFinished(List<Action> actions) {
             m_blockTexture = ContentManager.Get<Texture2D>("Logistics");
+            StorageUnitSeamlessTextures.Init();
         }
     }
 }
