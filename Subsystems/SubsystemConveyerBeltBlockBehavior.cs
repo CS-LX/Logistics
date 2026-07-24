@@ -56,7 +56,7 @@ namespace Logistics {
             m_subsystemBeltGroups.RequestRebuild(new Point3(neighborX, neighborY, neighborZ));
         }
 
-        /// <summary>P0 黑盒：点击查看本格序号；全局拓扑请按 F6 开调试框。</summary>
+        /// <summary>P0/P1：点击查看本格序号；F2 开调试框（含 inv 数量）。</summary>
         public override bool OnInteract(TerrainRaycastResult raycastResult, ComponentMiner componentMiner) {
             ComponentPlayer player = componentMiner.ComponentPlayer;
             if (player == null) {
@@ -64,17 +64,28 @@ namespace Logistics {
             }
             Point3 point = raycastResult.CellFace.Point;
             if (!m_subsystemBeltGroups.TryGetAt(point, out BeltGroup group)) {
-                player.ComponentGui.DisplaySmallMessage("输送带：尚未编组（等一帧）。按 F6 开调试绘制", Color.White, blinking: true, playNotificationSound: false);
+                player.ComponentGui.DisplaySmallMessage("输送带：尚未编组（等一帧）。按 F2 开调试绘制", Color.White, blinking: true, playNotificationSound: false);
                 return true;
             }
             int index = group.Members.IndexOf(point);
             string shortId = group.Id.ToString("N")[..8];
             player.ComponentGui.DisplaySmallMessage(
-                $"组 {shortId} 本格#{index}/{group.Members.Count} Sign={group.Sign}（F6 调试框）",
+                $"组 {shortId} 本格#{index}/{group.Members.Count} 在途{group.Inventory.Count} Sign={group.Sign}（F2）",
                 Color.White,
                 blinking: true,
                 playNotificationSound: false);
             return true;
+        }
+
+        public override void OnHitByProjectile(CellFace cellFace, WorldItem worldItem) {
+            m_subsystemBeltGroups.TryAbsorbWorldItem(cellFace.Point, worldItem);
+        }
+
+        public override void OnHitByProjectile(MovingBlock movingBlock, WorldItem worldItem) {
+            if (movingBlock == null) {
+                return;
+            }
+            m_subsystemBeltGroups.TryAbsorbWorldItem(Terrain.ToCell(movingBlock.Position), worldItem);
         }
 
         void UpdateOrientation(int x, int y, int z, int step) {

@@ -8,8 +8,8 @@ using TemplatesDatabase;
 
 namespace Logistics {
     /// <summary>
-    /// 输送带 Group 发现 / 存档 / 脏标记重建。P0：无运物；Sign 默认 +1。
-    /// 调试绘制：F6 开关（对齐 SCIENEW 太阳能/LED/VoltNet 的 F3–F5 调试框）。
+    /// 输送带 Group 发现 / 存档 / 连续运物仿真。
+    /// 调试绘制：F2 开关（对齐 SCIENEW F3–F5 调试框）。
     /// </summary>
     public class SubsystemBeltGroups : Subsystem, IUpdateable, IDrawable {
         public const string SaveKeyGroups = "Groups";
@@ -25,17 +25,23 @@ namespace Logistics {
         readonly Dictionary<Guid, BeltGroup> m_groups = new();
         readonly Dictionary<Point3, Guid> m_cellToGroup = new();
         readonly HashSet<Point3> m_dirtyRebuild = new();
+        readonly List<TransportedItem> m_ejectBuffer = [];
+        readonly List<LooseBeltItem> m_rebuildLooseItems = [];
         readonly PrimitivesRenderer3D m_primitivesRenderer3D = new();
+        readonly PrimitivesRenderer3D m_itemPrimitivesRenderer3D = new();
+        readonly DrawBlockEnvironmentData m_drawBlockEnvironmentData = new();
 
         FlatBatch3D m_flatBatch;
         FontBatch3D m_textBatch;
         SubsystemTerrain m_subsystemTerrain;
+        SubsystemPickables m_subsystemPickables;
+        SubsystemGameInfo m_subsystemGameInfo;
         int m_beltIndex;
         bool m_debugCanDraw;
 
         public UpdateOrder UpdateOrder => UpdateOrder.Default;
 
-        public int[] DrawOrders => [1000];
+        public int[] DrawOrders => [10, 1000];
 
         public bool TryGet(Guid id, out BeltGroup group) => m_groups.TryGetValue(id, out group);
 
@@ -49,10 +55,47 @@ namespace Logistics {
 
         public void RequestRebuild(Point3 point) => m_dirtyRebuild.Add(point);
 
+        /// <summary>将掉落物吸入对应 Group；成功则标记 ToRemove。</summary>
+        public bool TryAbsorbWorldItem(Point3 cell, WorldItem worldItem) {
+            if (worldItem == null || worldItem.ToRemove || !TryGetAt(cell, out BeltGroup group)) {
+                return false;
+            }
+            // 与玩家自动拾取相同的等待期，避免刚弹出的掉落物立刻被吸回
+            if (worldItem is Pickable ageCheck) {
+                double age = m_subsystemGameInfo.TotalElapsedGameTime - ageCheck.CreationTime;
+                if (age < ageCheck.TimeWaitToAutoPick) {
+                    return false;
+                }
+            }
+            int count = worldItem is Pickable pickable ? pickable.Count : 1;
+            if (count <= 0) {
+                return false;
+            }
+            float beltPos = BeltPath.WorldToBeltPosition(group, worldItem.Position, m_subsystemTerrain);
+            var item = new TransportedItem {
+                Value = worldItem.Value,
+                Count = count,
+                BeltPosition = beltPos,
+                SideOffset = 0f,
+                Velocity = worldItem.Velocity
+            };
+            if (!group.Inventory.TryInsert(item)) {
+                return false;
+            }
+            if (worldItem is Pickable p) {
+                p.Count = 0;
+            }
+            worldItem.ToRemove = true;
+            return true;
+        }
+
         public override void Load(ValuesDictionary valuesDictionary) {
             base.Load(valuesDictionary);
             m_subsystemTerrain = Project.FindSubsystem<SubsystemTerrain>(throwOnError: true);
+            m_subsystemPickables = Project.FindSubsystem<SubsystemPickables>(throwOnError: true);
+            m_subsystemGameInfo = Project.FindSubsystem<SubsystemGameInfo>(throwOnError: true);
             m_beltIndex = BlocksManager.GetBlockIndex<ConveyerBeltBlock>();
+            m_drawBlockEnvironmentData.SubsystemTerrain = m_subsystemTerrain;
             m_flatBatch = m_primitivesRenderer3D.FlatBatch(0, DepthStencilState.None);
             m_textBatch = m_primitivesRenderer3D.FontBatch(BitmapFont.DebugFont, 0, DepthStencilState.None);
             m_groups.Clear();
@@ -96,18 +139,22 @@ namespace Logistics {
             if (Keyboard.IsKeyDownOnce(Key.F2)) {
                 m_debugCanDraw = !m_debugCanDraw;
             }
-            if (m_dirtyRebuild.Count == 0) {
-                return;
+            if (m_dirtyRebuild.Count > 0) {
+                Point3[] dirty = m_dirtyRebuild.ToArray();
+                m_dirtyRebuild.Clear();
+                foreach (Point3 point in dirty) {
+                    RebuildAt(point);
+                }
             }
-            Point3[] dirty = m_dirtyRebuild.ToArray();
-            m_dirtyRebuild.Clear();
-            foreach (Point3 point in dirty) {
-                RebuildAt(point);
-            }
+            TickInventories(dt);
         }
 
         public void Draw(Camera camera, int drawOrder) {
-            if (!m_debugCanDraw) {
+            if (drawOrder == 10) {
+                DrawItems(camera);
+                return;
+            }
+            if (drawOrder != 1000 || !m_debugCanDraw) {
                 return;
             }
             int groupCount = m_groups.Count;
@@ -137,7 +184,7 @@ namespace Logistics {
                 const float s = 0.006f;
                 string shortId = group.Id.ToString("N")[..8];
                 m_textBatch.QueueText(
-                    $"{shortId}\n{group.Members.Count} cells\nSign={group.Sign}\n{groupCount} groups",
+                    $"{shortId}\n{group.Members.Count} cells\nSign={group.Sign}\ninv={group.Inventory.Count}\n{groupCount} groups",
                     textPos,
                     right * s,
                     up * s,
@@ -148,13 +195,83 @@ namespace Logistics {
             m_primitivesRenderer3D.Flush(camera.ViewProjectionMatrix);
         }
 
+        void DrawItems(Camera camera) {
+            float visibility = SettingsManager.VisibilityRange;
+            foreach (BeltGroup group in m_groups.Values) {
+                foreach (TransportedItem item in group.Inventory.Items) {
+                    if (!BeltPath.TryGetWorldPose(group, item.BeltPosition, item.SideOffset, m_subsystemTerrain, out Vector3 pos, out _)) {
+                        continue;
+                    }
+                    if (Vector3.Distance(pos, camera.ViewPosition) > visibility) {
+                        continue;
+                    }
+                    Point3 cell = Terrain.ToCell(pos);
+                    TerrainChunk chunk = m_subsystemTerrain.Terrain.GetChunkAtCell(cell.X, cell.Z);
+                    if (chunk is { State: >= TerrainChunkState.InvalidVertices1 } && cell.Y is >= 0 and < 255) {
+                        m_drawBlockEnvironmentData.Humidity = m_subsystemTerrain.Terrain.GetHumidity(cell.X, cell.Z);
+                        m_drawBlockEnvironmentData.Temperature = m_subsystemTerrain.Terrain.GetTemperature(cell.X, cell.Z);
+                        m_drawBlockEnvironmentData.Light = m_subsystemTerrain.Terrain.GetCellLightFast(cell.X, cell.Y, cell.Z);
+                    }
+                    m_drawBlockEnvironmentData.BillboardDirection = camera.ViewDirection;
+                    var matrix = Matrix.CreateTranslation(pos);
+                    Block block = BlocksManager.Blocks[Terrain.ExtractContents(item.Value)];
+                    block.DrawBlock(
+                        m_itemPrimitivesRenderer3D,
+                        item.Value,
+                        Color.White,
+                        BeltPath.ItemDrawSize,
+                        ref matrix,
+                        m_drawBlockEnvironmentData);
+                }
+            }
+            m_itemPrimitivesRenderer3D.Flush(camera.ViewProjectionMatrix);
+        }
+
+        void TickInventories(float dt) {
+            foreach (BeltGroup group in m_groups.Values) {
+                if (group.Inventory.Count == 0) {
+                    continue;
+                }
+                float length = BeltPath.TotalLength(group, m_subsystemTerrain);
+                m_ejectBuffer.Clear();
+                group.Inventory.Tick(group.Sign, group.SpeedAbs, length, dt, m_ejectBuffer);
+                foreach (TransportedItem item in m_ejectBuffer) {
+                    EjectItem(group, item);
+                }
+            }
+        }
+
+        /// <summary>对齐抓取机吐出思路，但缩小偏置/初速，减少带上图标→掉落物的断层感。</summary>
+        void EjectItem(BeltGroup group, TransportedItem item) {
+            float length = BeltPath.TotalLength(group, m_subsystemTerrain);
+            float posePos = group.Sign >= 0
+                ? MathF.Min(item.BeltPosition, length)
+                : MathF.Max(item.BeltPosition, 0f);
+            if (!BeltPath.TryGetWorldPose(group, posePos, item.SideOffset, m_subsystemTerrain, out Vector3 pos, out Vector3 tangent)) {
+                pos = new Vector3(group.Members[^1]) + new Vector3(0.5f, BeltPath.ItemCenterHeight, 0.5f);
+                tangent = Vector3.UnitZ;
+            }
+            Vector3 travel = group.Sign >= 0 ? tangent : -tangent;
+            // 略偏出末端格（小于抓取机 0.6），速度贴近带速
+            Vector3 spawn = pos + travel * 0.2f;
+            Vector3 velocity = travel * MathF.Max(group.SpeedAbs, 0.8f) + Vector3.UnitY * 0.04f;
+            m_subsystemPickables.AddPickable(item.Value, item.Count, spawn, velocity, null);
+        }
+
         static Color ColorForGuid(Guid id) {
             int h = id.GetHashCode();
-            // 避开过暗：偏亮色相，便于区分不同组
             byte r = (byte)(96 + ((h >> 0) & 0x7F));
             byte g = (byte)(96 + ((h >> 8) & 0x7F));
             byte b = (byte)(96 + ((h >> 16) & 0x7F));
             return new Color(r, g, b);
+        }
+
+        struct LooseBeltItem {
+            public int Value;
+            public int Count;
+            public Vector3 Position;
+            public Vector3 Velocity;
+            public float SideOffset;
         }
 
         /// <summary>以 seed 为起点，重发现其触及的连通分量并重建 Group。</summary>
@@ -170,7 +287,7 @@ namespace Logistics {
             var signByGuid = new Dictionary<Guid, int>();
             var speedByGuid = new Dictionary<Guid, float>();
             var membersByGuid = new Dictionary<Guid, List<Point3>>();
-            // 快照迭代，避免向 rediscoverSeeds 追加时改集合
+            m_rebuildLooseItems.Clear();
             foreach (Point3 p in rediscoverSeeds.ToArray()) {
                 if (!m_cellToGroup.TryGetValue(p, out Guid gid) || !m_groups.TryGetValue(gid, out BeltGroup g)) {
                     continue;
@@ -179,6 +296,27 @@ namespace Logistics {
                     signByGuid[gid] = g.Sign;
                     speedByGuid[gid] = g.SpeedAbs;
                     membersByGuid[gid] = [.. g.Members];
+                    foreach (TransportedItem item in g.Inventory.Items) {
+                        if (BeltPath.TryGetWorldPose(g, item.BeltPosition, item.SideOffset, m_subsystemTerrain, out Vector3 world, out Vector3 tangent)) {
+                            Vector3 travel = g.Sign >= 0 ? tangent : -tangent;
+                            m_rebuildLooseItems.Add(new LooseBeltItem {
+                                Value = item.Value,
+                                Count = item.Count,
+                                Position = world,
+                                Velocity = travel * g.SpeedAbs,
+                                SideOffset = item.SideOffset
+                            });
+                        }
+                        else {
+                            m_rebuildLooseItems.Add(new LooseBeltItem {
+                                Value = item.Value,
+                                Count = item.Count,
+                                Position = new Vector3(g.Controller) + new Vector3(0.5f),
+                                Velocity = item.Velocity,
+                                SideOffset = item.SideOffset
+                            });
+                        }
+                    }
                     foreach (Point3 m in g.Members) {
                         rediscoverSeeds.Add(m);
                     }
@@ -214,11 +352,50 @@ namespace Logistics {
                     keepId = Guid.NewGuid();
                 }
                 else {
-                    // 拆分时每个旧 Guid 只复用一次，其余分量新建
                     membersByGuid.Remove(keepId);
                 }
                 CreateGroup(keepId, cluster, sign, speed);
             }
+
+            // 按世界坐标迁回在途物；无法落入任何组则弹出
+            for (int i = 0; i < m_rebuildLooseItems.Count; i++) {
+                LooseBeltItem loose = m_rebuildLooseItems[i];
+                if (TryInsertLooseItem(loose)) {
+                    continue;
+                }
+                m_subsystemPickables.AddPickable(loose.Value, loose.Count, loose.Position, loose.Velocity, null);
+            }
+            m_rebuildLooseItems.Clear();
+        }
+
+        bool TryInsertLooseItem(LooseBeltItem loose) {
+            Point3 cell = Terrain.ToCell(loose.Position);
+            if (TryInsertAtCell(cell, loose)) {
+                return true;
+            }
+            for (int i = 0; i < 4; i++) {
+                for (int k = 0; k < 3; k++) {
+                    Point3 o = NeighborOffsets[i, k];
+                    if (TryInsertAtCell(new Point3(cell.X + o.X, cell.Y + o.Y, cell.Z + o.Z), loose)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        bool TryInsertAtCell(Point3 cell, LooseBeltItem loose) {
+            if (!TryGetAt(cell, out BeltGroup group)) {
+                return false;
+            }
+            float beltPos = BeltPath.WorldToBeltPosition(group, loose.Position, m_subsystemTerrain);
+            return group.Inventory.TryInsert(new TransportedItem {
+                Value = loose.Value,
+                Count = loose.Count,
+                BeltPosition = beltPos,
+                SideOffset = loose.SideOffset,
+                Velocity = loose.Velocity
+            });
         }
 
         void CollectTouchedGroupMembers(Point3 point, HashSet<Point3> into) {

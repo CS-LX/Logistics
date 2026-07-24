@@ -2,17 +2,16 @@ using Engine;
 using TemplatesDatabase;
 
 namespace Logistics {
-    /// <summary>
-    /// 一条直线（含坡）输送带组。物品库存将挂在 Controller 侧（P1）；P0 仅拓扑。
-    /// </summary>
+    /// <summary>一条直线（含坡）输送带组；在途库存挂在本实例（Controller 语义）。</summary>
     public sealed class BeltGroup {
         public const float DefaultSpeedAbs = 1f;
 
         public Guid Id { get; }
         public Point3 Controller { get; set; }
         public List<Point3> Members { get; } = [];
-        public int Sign { get; set; } = 1;
-        public float SpeedAbs { get; set; } = DefaultSpeedAbs;
+        public int Sign { get; init; } = 1;
+        public float SpeedAbs { get; init; } = DefaultSpeedAbs;
+        public BeltInventory Inventory { get; } = new();
 
         public BeltGroup(Guid id) {
             Id = id;
@@ -28,6 +27,9 @@ namespace Logistics {
                 membersVd.SetValue(i.ToString(), Members[i]);
             }
             vd.SetValue("Members", membersVd);
+            ValuesDictionary invVd = new();
+            Inventory.Write(invVd);
+            vd.SetValue("Inventory", invVd);
         }
 
         public static BeltGroup Read(ValuesDictionary vd) {
@@ -56,6 +58,10 @@ namespace Logistics {
                 foreach ((_, Point3 p) in indexed) {
                     group.Members.Add(p);
                 }
+            }
+            ValuesDictionary invVd = vd.GetValue<ValuesDictionary>("Inventory", null);
+            if (invVd != null) {
+                group.Inventory.Read(invVd);
             }
             return group;
         }
