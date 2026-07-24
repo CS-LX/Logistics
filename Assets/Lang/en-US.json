@@ -7,7 +7,7 @@
   },
   "LogisticsStorageUnitBlock": {
     "DisplayName": "Logistics Storage Unit",
-    "Description": "Expandable storage. Adjacent units share one vault whose capacity grows with the cluster; right-click to open, and page when it fills up. Inserters can pull from and push into the sides."
+    "Description": "Expandable storage. Adjacent units share one vault whose capacity grows with the cluster; right-click to open, and page when it fills up. Inserters can pull from and push into the sides. Craft from a iron chest with zinc plates, or a steel chest with fewer zinc plates."
   },
   "ContentWidgets": {
     "AdvancedInserterWidget": {
@@ -38,8 +38,10 @@
   },
   "IECraftingRecipes": {
     "Descriptions": {
-      "AdvancedInserter": "Upgrade an inserter with a circuit and logic gates",
-      "AdvancedFluidInserter": "Upgrade a fluid inserter with a circuit and logic gates"
+      "AdvancedInserter": "Upgrade an inserter with a circuit, logic gates, and zinc-sheet cladding",
+      "AdvancedFluidInserter": "Upgrade a fluid inserter with a circuit, logic gates, and zinc-sheet cladding",
+      "LogisticsStorageUnitChest": "Assemble a logistics storage unit from a iron chest and zinc plates",
+      "LogisticsStorageUnitSteelChest": "Assemble a logistics storage unit from a steel chest and fewer zinc plates"
     }
   }
 }

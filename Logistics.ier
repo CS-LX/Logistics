@@ -1,10 +1,20 @@
 <Recipes>
-	<Recipe Result="AdvancedInserterBlock:0" ResultCount="1" RequiredHeatLevel="0" a="D-InserterDevice" b="I-BasicCircuit" c="andgate" Description="[AdvancedInserter]">
+	<Recipe Result="AdvancedInserterBlock:0" ResultCount="1" RequiredHeatLevel="0" a="D-InserterDevice" b="I-BasicCircuit" c="andgate" d="I-ZincSheet" Description="[AdvancedInserter]">
 		"cbc"
+		"dad"
+	</Recipe>
+	<Recipe Result="AdvancedInserterBlock:8" ResultCount="1" RequiredHeatLevel="0" a="D-FluidInserterDevice" b="I-BasicCircuit" c="andgate" d="I-ZincSheet" Description="[AdvancedFluidInserter]">
+		"cbc"
+		"dad"
+	</Recipe>
+	<Recipe Result="LogisticsStorageUnitBlock:0" ResultCount="1" RequiredHeatLevel="0" a="I-ZincPlate" b="D-IronChestDevice" Description="[LogisticsStorageUnitChest]">
+		" a "
+		"aba"
 		" a "
 	</Recipe>
-	<Recipe Result="AdvancedInserterBlock:8" ResultCount="1" RequiredHeatLevel="0" a="D-FluidInserterDevice" b="I-BasicCircuit" c="andgate" Description="[AdvancedFluidInserter]">
-		"cbc"
-		" a "
+	<Recipe Result="LogisticsStorageUnitBlock:0" ResultCount="1" RequiredHeatLevel="0" a="I-ZincPlate" b="D-SteelChestDevice" Description="[LogisticsStorageUnitSteelChest]">
+		"a"
+		"b"
+		"a"
 	</Recipe>
 </Recipes>

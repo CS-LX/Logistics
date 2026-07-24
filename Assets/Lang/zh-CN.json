@@ -7,7 +7,7 @@
   },
   "LogisticsStorageUnitBlock": {
     "DisplayName": "物流存储单元",
-    "Description": "可连通扩展的存储方块。贴着放置会并入同一储存库，库容随相连数量增加；右键打开，物品多时可翻页。抓取机可从侧面自动存取。"
+    "Description": "可连通扩展的存储方块。贴着放置会并入同一储存库，库容随相连数量增加；右键打开，物品多时可翻页。抓取机可从侧面自动存取。可用铁箱加锌板，或钢箱加较少锌板合成。"
   },
   "ContentWidgets": {
     "AdvancedInserterWidget": {
@@ -38,8 +38,10 @@
   },
   "IECraftingRecipes": {
     "Descriptions": {
-      "AdvancedInserter": "给抓取机加装电路与逻辑门，改造成高级抓取机",
-      "AdvancedFluidInserter": "给流体抓取阀加装电路与逻辑门，改造成高级抓取阀"
+      "AdvancedInserter": "给抓取机加装电路、逻辑门，并用锌片包覆，改造成高级抓取机",
+      "AdvancedFluidInserter": "给流体抓取阀加装电路、逻辑门，并用锌片包覆，改造成高级抓取阀",
+      "LogisticsStorageUnitChest": "用铁箱子与锌板拼成物流存储单元",
+      "LogisticsStorageUnitSteelChest": "用钢箱子与较少锌板拼成物流存储单元"
     }
   }
 }
