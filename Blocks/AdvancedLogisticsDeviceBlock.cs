@@ -230,9 +230,9 @@ namespace Logistics {
 
     abstract class AdvancedModelInserterDefinition : AdvancedLogisticsDeviceDefinition {
         readonly string m_modelPath;
-        readonly BlockMesh[] m_meshesByFace = new BlockMesh[6];
-        readonly BoundingBox[][] m_collisionByFace = new BoundingBox[6][];
-        readonly BlockMesh m_standalone = new();
+        BlockMesh[] m_meshesByFace = new BlockMesh[6];
+        BoundingBox[][] m_collisionByFace = new BoundingBox[6][];
+        BlockMesh m_standalone = new();
 
         protected AdvancedModelInserterDefinition(string modelPath) {
             m_modelPath = modelPath;
@@ -247,6 +247,11 @@ namespace Logistics {
         public override bool IsPlacementTransparent(int value) => true;
 
         public override void Initialize() {
+            // PostProcessBlocksLoad 在模组加载与进世界时各跑一次；静态 definition 会复用，
+            // standalone 若只 Append 会叠层错位，而地形用的 m_meshesByFace 每次 new 所以仍正常。
+            m_meshesByFace = new BlockMesh[6];
+            m_collisionByFace = new BoundingBox[6][];
+            m_standalone = new BlockMesh();
             BuildMeshes(m_modelPath, "Inserter", m_meshesByFace, m_collisionByFace, m_standalone);
         }
 
