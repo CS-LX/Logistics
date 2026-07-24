@@ -4,8 +4,8 @@ using Game;
 
 namespace Logistics {
     /// <summary>
-    /// 输送带滚动贴图：底图 + 皮带条合成到 RenderTarget（外观预览用，无业务逻辑）。
-    /// 算法对齐 sc-guns SA 输送带动态贴图。
+    /// 输送带滚动贴图：底图 + 皮带条合成到固定 RenderTarget。
+    /// RT 在首次取用时即创建，保证地形几何始终引用同一纹理对象，进世界即可滚动。
     /// </summary>
     public static class ConveyerBeltAnimatedTexture {
         public const string BaseTexturePath = "Textures/ConveyerBelt/ConveyerBelt";
@@ -25,11 +25,12 @@ namespace Logistics {
             }
         }
 
-        /// <summary>地形用：有动画 RT 则返回 RT，否则静态底图。</summary>
+        /// <summary>地形与世界渲染统一用此 RT（内容每帧更新）。</summary>
         public static Texture2D Texture {
             get {
                 EnsureLoaded();
-                return m_animated ?? m_base!;
+                EnsureAnimatedTarget();
+                return m_animated!;
             }
         }
 
@@ -40,6 +41,7 @@ namespace Logistics {
             m_base = ContentManager.Get<Texture2D>(BaseTexturePath);
             m_beltStrip = ContentManager.Get<Texture2D>(BeltTexturePath);
             m_loaded = true;
+            EnsureAnimatedTarget();
         }
 
         public static void Update(float dt) {
@@ -52,9 +54,9 @@ namespace Logistics {
 
         public static void Draw() {
             EnsureLoaded();
+            EnsureAnimatedTarget();
             int width = m_base!.Width;
             int height = m_base.Height;
-            m_animated ??= new RenderTarget2D(width, height, 1, ColorFormat.Rgba8888, DepthFormat.None);
 
             RenderTarget2D previous = Display.RenderTarget;
             try {
@@ -101,6 +103,13 @@ namespace Logistics {
             finally {
                 Display.RenderTarget = previous;
             }
+        }
+
+        static void EnsureAnimatedTarget() {
+            if (m_animated != null || m_base == null) {
+                return;
+            }
+            m_animated = new RenderTarget2D(m_base.Width, m_base.Height, 1, ColorFormat.Rgba8888, DepthFormat.None);
         }
     }
 }

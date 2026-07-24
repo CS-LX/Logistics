@@ -19,6 +19,8 @@ namespace Logistics {
         public override void OnLoadingFinished(List<Action> actions) {
             m_blockTexture = ContentManager.Get<Texture2D>("Logistics");
             StorageUnitSeamlessTextures.Init();
+            // 尽早创建滚动 RT，避免进世界时地形仍绑到静态底图
+            ConveyerBeltAnimatedTexture.EnsureLoaded();
         }
     }
 }

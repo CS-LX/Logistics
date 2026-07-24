@@ -11,9 +11,9 @@
     "DisplayName": "Logistics Storage Unit",
     "Description": "Expandable storage. Adjacent units share one vault whose capacity grows with the cluster; right-click to open, and page when it fills up. Inserters can pull from and push into the sides. Craft from a iron chest with zinc plates, or a steel chest with fewer zinc plates."
   },
-  "ConveyerBeltPreviewBlock": {
-    "DisplayName": "Conveyor Belt Preview",
-    "Description": "Visual preview of the conveyor model and scrolling belt. Does not move items or use power."
+  "ConveyerBeltBlock": {
+    "DisplayName": "Conveyor Belt",
+    "Description": "Automatically aligns and climbs like rails (no corners). Belt scrolls visually; item transport comes later."
   },
   "ContentWidgets": {
     "AdvancedInserterWidget": {

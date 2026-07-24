@@ -44,5 +44,8 @@
 		<MemberSubsystemTemplate Name="ConveyerBeltVisuals" Guid="a0b10009-f4d8-131f-e3ca-b4232fe1fc5f" InheritanceParent="a3914c13-7801-46a6-b23a-9e2b36e9defb">
 			<Parameter Name="Class" Guid="a0b10009-d101-9ae8-8129-494b3004a068" Value="Logistics.SubsystemConveyerBeltVisuals" Type="string" />
 		</MemberSubsystemTemplate>
+		<MemberSubsystemTemplate Name="ConveyerBeltBlockBehavior" Guid="a0b1000b-f4d8-131f-e3ca-b4232fe1fc5f" InheritanceParent="aea46453-65b5-463a-9e0b-45f80bc41285">
+			<Parameter Name="Class" Guid="a0b1000b-d101-9ae8-8129-494b3004a068" Value="Logistics.SubsystemConveyerBeltBlockBehavior" Type="string" />
+		</MemberSubsystemTemplate>
 	</ProjectTemplate>
 </Logistics>
