@@ -9,7 +9,7 @@ namespace Logistics {
     /// 高级物流设备：同一 Index，Data 区分机型与朝向。
     /// Data：bit0-2 朝向(0..5)，bit3-4 机型(0=抓取机，1=抓取阀，2=分拣机)。
     /// </summary>
-    public class AdvancedLogisticsDeviceBlock : Block, IElectricElementBlock, IRotatableDevice {
+    public class AdvancedLogisticsDeviceBlock : Block, IElectricElementBlock, IRotatableDevice, IElectricDrillRemovable {
         public const int Index = 551;
 
         public const int FacingMask = 0b111;
