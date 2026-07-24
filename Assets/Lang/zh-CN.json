@@ -32,7 +32,8 @@
     },
     "StorageVaultWidget": {
       "1": "储存库",
-      "2": "背包"
+      "2": "背包",
+      "3": "{0}/{1}"
     }
   },
   "IECraftingRecipes": {

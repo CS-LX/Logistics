@@ -32,7 +32,8 @@
     },
     "StorageVaultWidget": {
       "1": "Storage Vault",
-      "2": "Inventory"
+      "2": "Inventory",
+      "3": "{0}/{1}"
     }
   },
   "IECraftingRecipes": {

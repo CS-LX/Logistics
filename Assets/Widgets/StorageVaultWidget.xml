@@ -1,7 +1,20 @@
 <ChestWidget xmlns="runtime-namespace:Game">
-	<BevelledRectangleWidget Size="614, 382" BevelSize="3"/>
-	<LabelWidget CanvasWidget.Position="12, 14" Name="VaultLabel" Text="[StorageVaultWidget:1]" Color="255, 255, 255, 192"/>
-	<LabelWidget CanvasWidget.Position="306, 14" Name="InventoryLabel" Text="[StorageVaultWidget:2]" Color="255, 255, 255, 192"/>
-	<GridPanelWidget CanvasWidget.Position="12, 52" Name="VaultGrid" ColumnsCount="6" RowsCount="4"/>
-	<GridPanelWidget CanvasWidget.Position="306, 52" Name="InventoryGrid" ColumnsCount="4" RowsCount="4"/>
+	<!-- 左库格 | 中翻页（电容调压式 +/- + 竖滑条）| 右背包 -->
+	<BevelledRectangleWidget Size="912, 382" BevelSize="3"/>
+	<LabelWidget CanvasWidget.Position="16, 14" Name="VaultLabel" Text="[StorageVaultWidget:1]" Color="255, 255, 255, 192"/>
+	<LabelWidget CanvasWidget.Position="608, 14" Name="InventoryLabel" Text="[StorageVaultWidget:2]" Color="255, 255, 255, 192"/>
+	<GridPanelWidget CanvasWidget.Position="16, 52" Name="VaultGrid" ColumnsCount="6" RowsCount="4"/>
+	<CanvasWidget CanvasWidget.Position="456, 52" Size="144, 288">
+		<StackPanelWidget Direction="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+			<StackPanelWidget Direction="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+				<BevelledButtonWidget Name="PreviousPageButton" Style="{Styles/ButtonStyle_ArrowUp}" HorizontalAlignment="Center"/>
+				<CanvasWidget Size="50, 144" HorizontalAlignment="Center">
+					<LabelWidget Name="PageLabel" Text="1/1" HorizontalAlignment="Center" VerticalAlignment="Center" Color="255, 255, 255, 192"/>
+				</CanvasWidget>
+				<BevelledButtonWidget Name="NextPageButton" Style="{Styles/ButtonStyle_ArrowDown}" HorizontalAlignment="Center"/>
+			</StackPanelWidget>
+			<SliderWidget Name="PageSlider" IsLabelVisible="false" Granularity="1" MinValue="1" MaxValue="1" VerticalAlignment="Center" LayoutDirection="Vertical" Margin="0, 10"/>
+		</StackPanelWidget>
+	</CanvasWidget>
+	<GridPanelWidget CanvasWidget.Position="608, 52" Name="InventoryGrid" ColumnsCount="4" RowsCount="4"/>
 </ChestWidget>
