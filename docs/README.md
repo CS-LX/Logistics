@@ -16,5 +16,6 @@
 | --- | --- |
 | [储存库实现计划.md](archive/储存库实现计划.md) | 储存单元 / 储存库（M1–M4 已完成） |
 | [Create传送带调研.md](archive/Create传送带调研.md) | Create Mechanical Belt 蒸馏；施工单见上行输送带计划 |
+| [SA-ComponentSAConveyerBelt-源码摘录.md](archive/SA-ComponentSAConveyerBelt-源码摘录.md) | SA 输送带组件及附属逻辑全文嵌入；开发对照，非目标实现 |
 
 本地 monorepo 开发路径须保持 `industrial-era-2/Addons/Logistics` 与 `industrial-era-2/SCIENEW` 同级。
