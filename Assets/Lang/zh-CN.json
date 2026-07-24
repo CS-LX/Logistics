@@ -11,6 +11,10 @@
     "DisplayName": "物流存储单元",
     "Description": "可连通扩展的存储方块。贴着放置会并入同一储存库，库容随相连数量增加；右键打开，物品多时可翻页。抓取机可从侧面自动存取。可用铁箱加锌板，或钢箱加较少锌板合成。"
   },
+  "ConveyerBeltPreviewBlock": {
+    "DisplayName": "输送带外观预览",
+    "Description": "仅用于查看输送带模型与皮带滚动外观，不能运送物品，也不接电力。"
+  },
   "ContentWidgets": {
     "AdvancedInserterWidget": {
       "1": "高级抓取机",
