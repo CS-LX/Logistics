@@ -35,7 +35,7 @@ namespace Logistics {
             toTank = null!;
             Point3 position = m_componentBlockEntity.Coordinates;
             int blockValue = m_subsystemTerrain.Terrain.GetCellValue(position.X, position.Y, position.Z);
-            int direction = AdvancedInserterBlock.GetFacing(blockValue);
+            int direction = AdvancedLogisticsDeviceBlock.GetFacing(blockValue);
             int fromFace = CellFace.OppositeFace(direction);
             int toFace = direction;
             Point3 fromPoint = m_componentBlockEntity.Coordinates + CellFace.FaceToPoint3(fromFace);

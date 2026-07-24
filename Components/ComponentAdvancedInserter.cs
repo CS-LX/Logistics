@@ -23,7 +23,7 @@ namespace Logistics {
             Point3 coordinates = m_componentBlockEntity.Coordinates;
             int cellValue = m_subsystemTerrain.Terrain.GetCellValue(coordinates.X, coordinates.Y, coordinates.Z);
             ITransferFilter filter = TransferFilter.FromInventory(this, 0, FilterSlotCount, m_filterMode);
-            int face = AdvancedInserterBlock.GetFacing(cellValue);
+            int face = AdvancedLogisticsDeviceBlock.GetFacing(cellValue);
             Vector3 faceVector = CellFace.FaceToVector3(face);
             Vector3 center = new Vector3(coordinates) + new Vector3(0.5f);
             Vector3 dropPosition = center + 0.6f * faceVector;

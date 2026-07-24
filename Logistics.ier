@@ -1,9 +1,9 @@
 <Recipes>
-	<Recipe Result="AdvancedInserterBlock:0" ResultCount="1" RequiredHeatLevel="0" a="D-InserterDevice" b="I-BasicCircuit" c="andgate" d="I-ZincSheet" Description="[AdvancedInserter]">
+	<Recipe Result="AdvancedLogisticsDeviceBlock:0" ResultCount="1" RequiredHeatLevel="0" a="D-InserterDevice" b="I-BasicCircuit" c="andgate" d="I-ZincSheet" Description="[AdvancedInserter]">
 		"cbc"
 		"dad"
 	</Recipe>
-	<Recipe Result="AdvancedInserterBlock:8" ResultCount="1" RequiredHeatLevel="0" a="D-FluidInserterDevice" b="I-BasicCircuit" c="andgate" d="I-ZincSheet" Description="[AdvancedFluidInserter]">
+	<Recipe Result="AdvancedLogisticsDeviceBlock:8" ResultCount="1" RequiredHeatLevel="0" a="D-FluidInserterDevice" b="I-BasicCircuit" c="andgate" d="I-ZincSheet" Description="[AdvancedFluidInserter]">
 		"cbc"
 		"dad"
 	</Recipe>

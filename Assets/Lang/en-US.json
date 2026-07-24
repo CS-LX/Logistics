@@ -1,9 +1,11 @@
 {
-  "AdvancedInserterBlock": {
+  "AdvancedLogisticsDeviceBlock": {
     "Inserter": "Advanced Inserter",
     "FluidInserter": "Advanced Fluid Inserter",
+    "Sorter": "Advanced Sorter",
     "DescriptionInserter": "On an electric pulse, pulls items from the rear container into the front one.\nPlace samples in filter slots and use allow-list or deny-list; an empty list filters nothing.\nWith no front container, items are ejected.",
-    "DescriptionFluidInserter": "On an electric pulse, moves roughly one bucket of fluid from the rear tank to the front tank.\nPlace sample fluids and use allow-list or deny-list; an empty list filters nothing."
+    "DescriptionFluidInserter": "On an electric pulse, moves roughly one bucket of fluid from the rear tank to the front tank.\nPlace sample fluids and use allow-list or deny-list; an empty list filters nothing.",
+    "DescriptionSorter": "A placeholder block for future multi-channel logistics sorting. The top and bottom use casing, while the four sides show red, green, yellow, and blue ports."
   },
   "LogisticsStorageUnitBlock": {
     "DisplayName": "Logistics Storage Unit",

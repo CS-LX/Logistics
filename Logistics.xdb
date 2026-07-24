@@ -25,8 +25,8 @@
 	</Folder>
 	<!-- 与宿主 / IE2 共用 Project Guid，MemberSubsystemTemplate 才会并入世界 Project -->
 	<ProjectTemplate Name="Project" Guid="85023bf8-1c90-4dd1-9442-e6c13691d078">
-		<MemberSubsystemTemplate Name="AdvancedInserterBlockBehavior" Guid="a0b10004-f4d8-131f-e3ca-b4232fe1fc5f" InheritanceParent="aea46453-65b5-463a-9e0b-45f80bc41285">
-			<Parameter Name="Class" Guid="a0b10004-d101-9ae8-8129-494b3004a068" Value="Logistics.SubsystemAdvancedInserterBlockBehavior" Type="string" />
+		<MemberSubsystemTemplate Name="AdvancedLogisticsDeviceBlockBehavior" Guid="a0b10004-f4d8-131f-e3ca-b4232fe1fc5f" InheritanceParent="aea46453-65b5-463a-9e0b-45f80bc41285">
+			<Parameter Name="Class" Guid="a0b10004-d101-9ae8-8129-494b3004a068" Value="Logistics.SubsystemAdvancedLogisticsDeviceBlockBehavior" Type="string" />
 		</MemberSubsystemTemplate>
 		<MemberSubsystemTemplate Name="StorageVaults" Guid="a0b10006-f4d8-131f-e3ca-b4232fe1fc5f" InheritanceParent="a3914c13-7801-46a6-b23a-9e2b36e9defb">
 			<Parameter Name="Class" Guid="a0b10006-d101-9ae8-8129-494b3004a068" Value="Logistics.SubsystemStorageVaults" Type="string" />
