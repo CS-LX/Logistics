@@ -1,11 +1,14 @@
 using Engine;
 using Game;
 using GameEntitySystem;
+using SCIENEW.Utils;
 using TemplatesDatabase;
 
 namespace Logistics {
-    /// <summary>输送带行为：邻接时自动对齐朝向与爬坡（仿铁轨，不转弯）；变更时请求 Group 重建。</summary>
+    /// <summary>输送带行为：邻接时自动对齐朝向与爬坡（仿铁轨，不转弯）；变更时请求 Group 重建；每格 Segment 实体供抓取机 IInventory。</summary>
     public class SubsystemConveyerBeltBlockBehavior : SubsystemBlockBehavior {
+        public const string SegmentEntityName = "ConveyerBeltSegment";
+
         /// <summary>与 SCIENEW 铁轨一致：行=水平四向(0=-Z,1=-X,2=+Z,3=+X)，列=同层/上层/下层。</summary>
         static readonly Point3[,] NeighborOffsets = {
             { new(0, 0, -1), new(0, 1, -1), new(0, -1, -1) },
@@ -16,6 +19,7 @@ namespace Logistics {
 
         SubsystemTerrain m_subsystemTerrain;
         SubsystemBeltGroups m_subsystemBeltGroups;
+        SubsystemBlockEntities m_subsystemBlockEntities;
 
         public override int[] HandledBlocks => [BlocksManager.GetBlockIndex<ConveyerBeltBlock>()];
 
@@ -23,16 +27,22 @@ namespace Logistics {
             base.Load(valuesDictionary);
             m_subsystemTerrain = Project.FindSubsystem<SubsystemTerrain>(throwOnError: true);
             m_subsystemBeltGroups = Project.FindSubsystem<SubsystemBeltGroups>(throwOnError: true);
+            m_subsystemBlockEntities = Project.FindSubsystem<SubsystemBlockEntities>(throwOnError: true);
             ConveyerBeltAnimatedTexture.EnsureLoaded();
         }
 
         public override void OnBlockAdded(int value, int oldValue, int x, int y, int z) {
             UpdateOrientation(x, y, z, step: 1);
+            EnsureSegmentEntity(new Point3(x, y, z));
             m_subsystemBeltGroups.RequestRebuild(new Point3(x, y, z));
         }
 
         public override void OnBlockRemoved(int value, int newValue, int x, int y, int z) {
             Point3 point = new(x, y, z);
+            ComponentBlockEntity blockEntity = m_subsystemBlockEntities.GetBlockEntity(x, y, z);
+            if (blockEntity != null) {
+                Project.RemoveEntity(blockEntity.Entity, disposeEntity: true);
+            }
             m_subsystemBeltGroups.RequestRebuild(point);
             for (int i = 0; i < 4; i++) {
                 for (int k = 0; k < 3; k++) {
@@ -43,6 +53,7 @@ namespace Logistics {
         }
 
         public override void OnBlockGenerated(int value, int x, int y, int z, bool isLoaded) {
+            EnsureSegmentEntity(new Point3(x, y, z));
             m_subsystemBeltGroups.RequestRebuild(new Point3(x, y, z));
         }
 
@@ -86,6 +97,13 @@ namespace Logistics {
                 return;
             }
             m_subsystemBeltGroups.TryAbsorbWorldItem(Terrain.ToCell(movingBlock.Position), worldItem);
+        }
+
+        void EnsureSegmentEntity(Point3 point) {
+            if (BlockEntityUtils.GetBlockEntity(m_subsystemTerrain, point, out _)) {
+                return;
+            }
+            BlockEntityUtils.CreateBlockEntity(m_subsystemTerrain, SegmentEntityName, point);
         }
 
         void UpdateOrientation(int x, int y, int z, int step) {

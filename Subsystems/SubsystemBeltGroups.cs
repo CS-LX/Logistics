@@ -4,6 +4,7 @@ using Engine.Input;
 using Engine.Media;
 using Game;
 using GameEntitySystem;
+using SCIENEW.Utils;
 using TemplatesDatabase;
 
 namespace Logistics {
@@ -444,7 +445,18 @@ namespace Logistics {
             m_groups[id] = group;
             foreach (Point3 p in ordered) {
                 m_cellToGroup[p] = id;
+                EnsureSegmentEntity(p);
             }
+        }
+
+        void EnsureSegmentEntity(Point3 point) {
+            if (!IsBeltCell(point) || BlockEntityUtils.GetBlockEntity(m_subsystemTerrain, point, out _)) {
+                return;
+            }
+            BlockEntityUtils.CreateBlockEntity(
+                m_subsystemTerrain,
+                SubsystemConveyerBeltBlockBehavior.SegmentEntityName,
+                point);
         }
 
         void RemoveGroup(Guid id) {

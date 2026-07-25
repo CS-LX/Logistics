@@ -52,14 +52,52 @@ namespace Logistics {
             if (item == null || item.Count <= 0 || item.Value == 0) {
                 return false;
             }
-            foreach (TransportedItem existing in m_items) {
-                if (MathF.Abs(existing.BeltPosition - item.BeltPosition) < Spacing * 0.5f) {
-                    return false;
-                }
+            if (!CanInsertAt(item.BeltPosition)) {
+                return false;
             }
             m_items.Add(item);
             SortInPlace();
             return true;
+        }
+
+        public bool CanInsertAt(float beltPosition) {
+            foreach (TransportedItem existing in m_items) {
+                if (MathF.Abs(existing.BeltPosition - beltPosition) < Spacing * 0.5f) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /// <summary>窗口内距 <paramref name="center"/> 最近的在途物下标；无则 -1。</summary>
+        public int FindClosestInWindow(float center, float halfWidth) {
+            int best = -1;
+            float bestDist = float.MaxValue;
+            for (int i = 0; i < m_items.Count; i++) {
+                float d = MathF.Abs(m_items[i].BeltPosition - center);
+                if (d > halfWidth || d >= bestDist) {
+                    continue;
+                }
+                bestDist = d;
+                best = i;
+            }
+            return best;
+        }
+
+        public TransportedItem GetAt(int index) => m_items[index];
+
+        /// <returns>实际移除数量。</returns>
+        public int RemoveAt(int index, int count) {
+            if (index < 0 || index >= m_items.Count || count <= 0) {
+                return 0;
+            }
+            TransportedItem item = m_items[index];
+            int take = Math.Min(count, item.Count);
+            item.Count -= take;
+            if (item.Count <= 0) {
+                m_items.RemoveAt(index);
+            }
+            return take;
         }
 
         /// <summary>

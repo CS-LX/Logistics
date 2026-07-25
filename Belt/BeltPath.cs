@@ -19,6 +19,27 @@ namespace Logistics {
             return sum;
         }
 
+        /// <summary>某成员格弧长中心（前缀和 + 半格长），供 Segment 窗口锚定。</summary>
+        public static bool TryGetMemberCenterBeltPosition(
+            BeltGroup group,
+            Point3 cell,
+            SubsystemTerrain terrain,
+            out float center,
+            out int memberIndex) {
+            center = 0f;
+            memberIndex = group.Members.IndexOf(cell);
+            if (memberIndex < 0) {
+                return false;
+            }
+            float offset = 0f;
+            for (int i = 0; i < memberIndex; i++) {
+                offset += CellLength(GetShape(terrain, group.Members[i]));
+            }
+            float len = CellLength(GetShape(terrain, group.Members[memberIndex]));
+            center = offset + len * 0.5f;
+            return true;
+        }
+
         public static float WorldToBeltPosition(BeltGroup group, Vector3 world, SubsystemTerrain terrain) {
             float bestPos = 0f;
             float bestDist = float.MaxValue;
