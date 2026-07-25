@@ -4,6 +4,7 @@ using Engine.Input;
 using Engine.Media;
 using Game;
 using GameEntitySystem;
+using SCIENEW;
 using SCIENEW.Utils;
 using TemplatesDatabase;
 
@@ -37,6 +38,7 @@ namespace Logistics {
         SubsystemTerrain m_subsystemTerrain;
         SubsystemPickables m_subsystemPickables;
         SubsystemGameInfo m_subsystemGameInfo;
+        SubsystemEnginePower m_subsystemEnginePower;
         int m_beltIndex;
         bool m_debugCanDraw;
 
@@ -55,6 +57,21 @@ namespace Logistics {
         }
 
         public void RequestRebuild(Point3 point) => m_dirtyRebuild.Add(point);
+
+        /// <summary>
+        /// P4：任一段两侧（垂直于带走向）邻接正在输出的机械能 → 整组运转。
+        /// </summary>
+        public bool IsGroupRunning(BeltGroup group) {
+            if (group == null || m_subsystemEnginePower == null) {
+                return false;
+            }
+            foreach (Point3 cell in group.Members) {
+                if (IsSegmentSidePowered(cell)) {
+                    return true;
+                }
+            }
+            return false;
+        }
 
         /// <summary>将掉落物吸入对应 Group；成功则标记 ToRemove。</summary>
         public bool TryAbsorbWorldItem(Point3 cell, WorldItem worldItem) {
@@ -95,6 +112,7 @@ namespace Logistics {
             m_subsystemTerrain = Project.FindSubsystem<SubsystemTerrain>(throwOnError: true);
             m_subsystemPickables = Project.FindSubsystem<SubsystemPickables>(throwOnError: true);
             m_subsystemGameInfo = Project.FindSubsystem<SubsystemGameInfo>(throwOnError: true);
+            m_subsystemEnginePower = Project.FindSubsystem<SubsystemEnginePower>(throwOnError: true);
             m_beltIndex = BlocksManager.GetBlockIndex<ConveyerBeltBlock>();
             m_drawBlockEnvironmentData.SubsystemTerrain = m_subsystemTerrain;
             m_flatBatch = m_primitivesRenderer3D.FlatBatch(0, DepthStencilState.None);
@@ -184,8 +202,9 @@ namespace Logistics {
                 Vector3 up = Vector3.Normalize(-Vector3.Cross(right, camera.ViewDirection));
                 const float s = 0.006f;
                 string shortId = group.Id.ToString("N")[..8];
+                bool running = IsGroupRunning(group);
                 m_textBatch.QueueText(
-                    $"{shortId}\n{group.Members.Count} cells\nSign={group.Sign}\ninv={group.Inventory.Count}\n{groupCount} groups",
+                    $"{shortId}\n{group.Members.Count} cells\nSign={group.Sign} run={(running ? 1 : 0)}\ninv={group.Inventory.Count}\n{groupCount} groups",
                     textPos,
                     right * s,
                     up * s,
@@ -233,6 +252,13 @@ namespace Logistics {
                 if (group.Inventory.Count == 0) {
                     continue;
                 }
+                // 无机械能：在途物停住，不推进、不末端弹出；臂仍可抽塞
+                if (!IsGroupRunning(group)) {
+                    foreach (TransportedItem item in group.Inventory.Items) {
+                        item.Velocity = Vector3.Zero;
+                    }
+                    continue;
+                }
                 float length = BeltPath.TotalLength(group, m_subsystemTerrain);
                 foreach (TransportedItem item in group.Inventory.Items) {
                     if (!BeltPath.TryGetWorldPose(group, item.BeltPosition, item.SideOffset, m_subsystemTerrain, out _, out Vector3 tangent)) {
@@ -240,7 +266,6 @@ namespace Logistics {
                     }
                     Vector3 travel = group.Sign >= 0 ? tangent : -tangent;
                     Vector3 desired = travel * group.SpeedAbs;
-                    // P3：跨带后世界速度向本带切向靠拢
                     item.Velocity = Vector3.Lerp(item.Velocity, desired, MathF.Min(1f, dt * 8f));
                 }
                 m_ejectBuffer.Clear();
@@ -249,6 +274,29 @@ namespace Logistics {
                     HandleBeltEnd(group, item);
                 }
             }
+        }
+
+        /// <summary>
+        /// 两侧 = 垂直于带走向的左右面（沿 Z 走向查 ±X；沿 X 走向查 ±Z），不含沿带前后与上下。
+        /// </summary>
+        bool IsSegmentSidePowered(Point3 cell) {
+            if (!TryGetCellValue(cell, out int value) || Terrain.ExtractContents(value) != m_beltIndex) {
+                return false;
+            }
+            int rotation = ConveyerBeltBlock.GetRotation(Terrain.ExtractData(value));
+            // Face: 0=+Z, 1=+X, 2=-Z, 3=-X
+            int faceA;
+            int faceB;
+            if ((rotation & 1) == 0) {
+                faceA = 1;
+                faceB = 3;
+            }
+            else {
+                faceA = 0;
+                faceB = 2;
+            }
+            return m_subsystemEnginePower.IsPowered(new CellFace(cell, faceA), out _)
+                || m_subsystemEnginePower.IsPowered(new CellFace(cell, faceB), out _);
         }
 
         /// <summary>末端：优先正交滑入邻组，否则弹出 Pickable。</summary>

@@ -81,7 +81,7 @@ namespace Logistics {
             int index = group.Members.IndexOf(point);
             string shortId = group.Id.ToString("N")[..8];
             player.ComponentGui.DisplaySmallMessage(
-                $"组 {shortId} 本格#{index}/{group.Members.Count} 在途{group.Inventory.Count} Sign={group.Sign}（F2）",
+                $"组 {shortId} 本格#{index}/{group.Members.Count} 在途{group.Inventory.Count} Sign={group.Sign} run={(m_subsystemBeltGroups.IsGroupRunning(group) ? 1 : 0)}（F2）",
                 Color.White,
                 blinking: true,
                 playNotificationSound: false);
