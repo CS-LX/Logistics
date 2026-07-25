@@ -63,11 +63,31 @@ namespace Logistics {
                 return;
             }
             UpdateOrientation(x, y, z, step: 1);
+            if (m_subsystemBeltGroups.SuppressRebuildFromVisualSync) {
+                return;
+            }
             m_subsystemBeltGroups.RequestRebuild(new Point3(x, y, z));
             m_subsystemBeltGroups.RequestRebuild(new Point3(neighborX, neighborY, neighborZ));
         }
 
-        /// <summary>P0/P1：点击查看本格序号；F2 开调试框（含 inv 数量）。</summary>
+        public override void OnBlockModified(int value, int oldValue, int x, int y, int z) {
+            // 仅 reverse/powered 变化：地形会自行 Downgrade 重 mesh，勿再 Rebuild 编组
+            if (Terrain.ExtractContents(value) != BlocksManager.GetBlockIndex<ConveyerBeltBlock>()) {
+                return;
+            }
+            int oldData = Terrain.ExtractData(oldValue);
+            int newData = Terrain.ExtractData(value);
+            if (ConveyerBeltBlock.GetRotation(oldData) == ConveyerBeltBlock.GetRotation(newData)
+                && ConveyerBeltBlock.GetShape(oldData) == ConveyerBeltBlock.GetShape(newData)) {
+                return;
+            }
+            if (m_subsystemBeltGroups.SuppressRebuildFromVisualSync) {
+                return;
+            }
+            m_subsystemBeltGroups.RequestRebuild(new Point3(x, y, z));
+        }
+
+        /// <summary>P6：点击调向（切换整组 Sign）；附带简要状态。</summary>
         public override bool OnInteract(TerrainRaycastResult raycastResult, ComponentMiner componentMiner) {
             ComponentPlayer player = componentMiner.ComponentPlayer;
             if (player == null) {
@@ -78,13 +98,29 @@ namespace Logistics {
                 player.ComponentGui.DisplaySmallMessage("输送带：尚未编组（等一帧）。按 F2 开调试绘制", Color.White, blinking: true, playNotificationSound: false);
                 return true;
             }
-            int index = group.Members.IndexOf(point);
-            string shortId = group.Id.ToString("N")[..8];
-            player.ComponentGui.DisplaySmallMessage(
-                $"组 {shortId} 本格#{index}/{group.Members.Count} 在途{group.Inventory.Count} Sign={group.Sign} run={(m_subsystemBeltGroups.IsGroupRunning(group) ? 1 : 0)}（F2）",
-                Color.White,
-                blinking: true,
-                playNotificationSound: false);
+            string dirLabel = group.Sign >= 0 ? "正向" : "反向";
+            string runLabel = m_subsystemBeltGroups.IsGroupRunning(group) ? "运转中" : "已停止（需侧面机械能）";
+            DialogsManager.ShowDialog(
+                player.GuiWidget,
+                new MessageDialog(
+                    "输送带方向",
+                    $"当前：{dirLabel} · {runLabel}\n在途 {group.Inventory.Count} 件 · 共 {group.Members.Count} 格",
+                    "切换方向",
+                    "关闭",
+                    button => {
+                        if (button != MessageDialogButton.Button1) {
+                            return;
+                        }
+                        if (!m_subsystemBeltGroups.TryToggleSign(point, out int newSign)) {
+                            return;
+                        }
+                        string now = newSign >= 0 ? "正向" : "反向";
+                        player.ComponentGui.DisplaySmallMessage(
+                            $"输送带已改为{now}",
+                            Color.White,
+                            blinking: true,
+                            playNotificationSound: false);
+                    }));
             return true;
         }
 
@@ -180,7 +216,8 @@ namespace Logistics {
                 }
             }
 
-            int newData = ConveyerBeltBlock.MakeData(shape, rotation);
+            // 只改 shape/rotation；reverse（调向）与 powered（运转）由 Group 同步，铺设邻接不得抹掉
+            int newData = ConveyerBeltBlock.WithGeometry(data, shape, rotation);
             if (newData == data) {
                 return;
             }

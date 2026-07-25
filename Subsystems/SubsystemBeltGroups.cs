@@ -32,6 +32,7 @@ namespace Logistics {
         readonly PrimitivesRenderer3D m_primitivesRenderer3D = new();
         readonly PrimitivesRenderer3D m_itemPrimitivesRenderer3D = new();
         readonly DrawBlockEnvironmentData m_drawBlockEnvironmentData = new();
+        readonly Dictionary<Guid, long> m_syncedVisualKey = new();
 
         FlatBatch3D m_flatBatch;
         FontBatch3D m_textBatch;
@@ -42,6 +43,11 @@ namespace Logistics {
         SubsystemBodies m_subsystemBodies;
         int m_beltIndex;
         bool m_debugCanDraw;
+
+        /// <summary>视觉 Sync 后若干帧内禁止邻格 RequestRebuild（ChangeCell 的邻接通知是延迟的）。</summary>
+        int m_visualSyncSuppressRemaining;
+
+        public bool SuppressRebuildFromVisualSync => m_visualSyncSuppressRemaining > 0;
 
         /// <summary>对齐 SA：站立加速度系数。</summary>
         public const float CreaturePushAcceleration = 10f;
@@ -75,6 +81,85 @@ namespace Logistics {
                 }
             }
             return false;
+        }
+
+        /// <summary>切换整组 Sign，并立刻把 reverse 写回各格 Data（UV 反向）。</summary>
+        public bool TryToggleSign(Point3 cell, out int newSign) {
+            newSign = 1;
+            if (!TryGetAt(cell, out BeltGroup group)) {
+                return false;
+            }
+            group.Sign = group.Sign >= 0 ? -1 : 1;
+            newSign = group.Sign;
+            SyncGroupVisualData(group, force: true);
+            return true;
+        }
+
+        /// <summary>是否存在任意运转中的输送带组（驱动全局 RT 是否滚动）。</summary>
+        public bool AnyGroupRunning() {
+            foreach (BeltGroup group in m_groups.Values) {
+                if (IsGroupRunning(group)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 将 Group.Sign / 运转状态同步到各格 Data：reverse + powered。
+        /// 仅在状态变化时 ChangeCell；Sync 期间抑制邻格 Rebuild。
+        /// </summary>
+        public void SyncGroupVisualData(BeltGroup group, bool force = false) {
+            if (group == null) {
+                return;
+            }
+            int reverse = ConveyerBeltBlock.SignToReverse(group.Sign);
+            int powered = IsGroupRunning(group) ? 1 : 0;
+            long key = ((long)reverse << 1) | (uint)powered;
+            if (!force && m_syncedVisualKey.TryGetValue(group.Id, out long prev) && prev == key) {
+                return;
+            }
+            m_syncedVisualKey[group.Id] = key;
+            bool anyChanged = false;
+            foreach (Point3 cell in group.Members) {
+                if (!TryGetCellValue(cell, out int value) || Terrain.ExtractContents(value) != m_beltIndex) {
+                    continue;
+                }
+                int data = Terrain.ExtractData(value);
+                int newData = ConveyerBeltBlock.SetPowered(ConveyerBeltBlock.SetReverse(data, reverse), powered);
+                if (newData == data) {
+                    continue;
+                }
+                anyChanged = true;
+                m_subsystemTerrain.ChangeCell(cell.X, cell.Y, cell.Z, Terrain.ReplaceData(value, newData));
+            }
+            // ChangeCell → ProcessModifiedCells 的 OnNeighbor 在后续帧；多留 2 帧抑制 Rebuild
+            if (anyChanged) {
+                m_visualSyncSuppressRemaining = Math.Max(m_visualSyncSuppressRemaining, 2);
+            }
+        }
+
+        void SyncAllGroupVisualData() {
+            foreach (BeltGroup group in m_groups.Values) {
+                SyncGroupVisualData(group);
+            }
+            // 已删除组的缓存
+            if (m_syncedVisualKey.Count <= m_groups.Count) {
+                return;
+            }
+            List<Guid> stale = null;
+            foreach (Guid id in m_syncedVisualKey.Keys) {
+                if (!m_groups.ContainsKey(id)) {
+                    stale ??= [];
+                    stale.Add(id);
+                }
+            }
+            if (stale == null) {
+                return;
+            }
+            foreach (Guid id in stale) {
+                m_syncedVisualKey.Remove(id);
+            }
         }
 
         /// <summary>将掉落物吸入对应 Group；成功则标记 ToRemove。</summary>
@@ -172,6 +257,10 @@ namespace Logistics {
             }
             TickInventories(dt);
             PushStandingBodies(dt);
+            SyncAllGroupVisualData();
+            if (m_visualSyncSuppressRemaining > 0) {
+                m_visualSyncSuppressRemaining--;
+            }
         }
 
         /// <summary>
@@ -559,6 +648,7 @@ namespace Logistics {
 
             foreach (Guid gid in touchedGuids) {
                 RemoveGroup(gid);
+                m_syncedVisualKey.Remove(gid);
             }
 
             var visited = new HashSet<Point3>();
@@ -578,6 +668,10 @@ namespace Logistics {
                 float speed = BeltGroup.DefaultSpeedAbs;
                 if (keepId != Guid.Empty && signByGuid.TryGetValue(keepId, out int oldSign)) {
                     sign = oldSign;
+                }
+                else {
+                    // 新组：从格上 reverse 取 Sign（铺设朝向 / 旧档）；同组成员多数决，平局偏 +1
+                    sign = ResolveSignFromCells(cluster);
                 }
                 if (keepId != Guid.Empty && speedByGuid.TryGetValue(keepId, out float oldSpeed)) {
                     speed = oldSpeed;
@@ -680,6 +774,28 @@ namespace Logistics {
                 m_cellToGroup[p] = id;
                 EnsureSegmentEntity(p);
             }
+            // reverse/powered 在 Update 末尾 SyncAll；此处不 ChangeCell，避免 Rebuild 中再 dirty
+        }
+
+        /// <summary>新组 Sign：格 reverse 多数决；平局或无法读取时 +1。</summary>
+        int ResolveSignFromCells(IReadOnlyList<Point3> cluster) {
+            int positive = 0;
+            int negative = 0;
+            foreach (Point3 p in cluster) {
+                if (!TryGetCellValue(p, out int value) || Terrain.ExtractContents(value) != m_beltIndex) {
+                    continue;
+                }
+                if (ConveyerBeltBlock.GetReverse(Terrain.ExtractData(value)) != 0) {
+                    negative++;
+                }
+                else {
+                    positive++;
+                }
+            }
+            if (positive == 0 && negative == 0) {
+                return 1;
+            }
+            return positive >= negative ? 1 : -1;
         }
 
         void EnsureSegmentEntity(Point3 point) {

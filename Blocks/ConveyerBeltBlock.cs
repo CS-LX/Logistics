@@ -5,12 +5,14 @@ using SCIENEW;
 
 namespace Logistics {
     /// <summary>
-    /// 输送带方块。Data：bit0-1 朝向 rotation(0..3)，bit2 形态 shape(0 平直 / 1 坡道)。
-    /// 邻接自动对齐由 <see cref="SubsystemConveyerBeltBlockBehavior"/> 处理。
+    /// 输送带方块。Data：
+    /// bit0-1 rotation(0..3)，bit2 shape(0 平直 / 1 坡道)，
+    /// bit3 reverse(0=Sign+1 / 1=Sign-1)，bit4 powered(0 静贴图左半 / 1 滚动右半)。
+    /// 邻接自动对齐只改 shape/rotation，保留 reverse/powered。
     /// </summary>
     public class ConveyerBeltBlock : Block {
         public const int Index = 553;
-        public const int MeshCount = 8;
+        public const int MeshCount = 32;
 
         public override bool IsIndexDynamic => false;
 
@@ -38,6 +40,9 @@ namespace Logistics {
         public override bool IsFaceTransparent(SubsystemTerrain subsystemTerrain, int face, int value) => true;
 
         public override bool IsPlacementTransparent_(int value) => true;
+
+        /// <summary>允许瞄准交互：弹出调向对话框。</summary>
+        public override bool IsInteractive(SubsystemTerrain subsystemTerrain, int value) => true;
 
         public override IEnumerable<int> GetCreativeValues() {
             yield return Terrain.MakeBlockValue(BlockIndex, 0, MakeData(shape: 0, rotation: 0));
@@ -71,9 +76,19 @@ namespace Logistics {
             int value,
             TerrainRaycastResult raycastResult) {
             Vector3 forward = componentMiner.ComponentCreature.ComponentCreatureModel.EyeRotation.GetForwardVector();
-            int rotation = MathUtils.Abs(forward.X) > MathUtils.Abs(forward.Z) ? 1 : 0;
+            // 轴：|X| 大 → 沿 X(rotation 1)；否则沿 Z(rotation 0)。reverse 对齐视线，使落地带物流朝向玩家面前。
+            int rotation;
+            int reverse;
+            if (MathUtils.Abs(forward.X) > MathUtils.Abs(forward.Z)) {
+                rotation = 1;
+                reverse = forward.X > 0f ? 1 : 0;
+            }
+            else {
+                rotation = 0;
+                reverse = forward.Z > 0f ? 1 : 0;
+            }
             return new BlockPlacementData {
-                Value = Terrain.MakeBlockValue(BlockIndex, 0, MakeData(0, rotation)),
+                Value = Terrain.MakeBlockValue(BlockIndex, 0, MakeData(0, rotation, reverse, powered: 0)),
                 CellFace = raycastResult.CellFace
             };
         }
@@ -126,15 +141,35 @@ namespace Logistics {
 
         public static int GetShape(int data) => (data >> 2) & 1;
 
+        public static int GetReverse(int data) => (data >> 3) & 1;
+
+        public static int GetPowered(int data) => (data >> 4) & 1;
+
         public static int SetRotation(int data, int rotation) => (data & ~0b11) | (rotation & 0b11);
 
         public static int SetShape(int data, int shape) => (data & ~0b100) | ((shape & 1) << 2);
 
-        public static int MakeData(int shape, int rotation) => SetShape(SetRotation(0, rotation), shape);
+        public static int SetReverse(int data, int reverse) => (data & ~0b1000) | ((reverse & 1) << 3);
 
-        public static int MeshIndex(int data) => MathUtils.Clamp(GetShape(data) * 4 + GetRotation(data), 0, MeshCount - 1);
+        public static int SetPowered(int data, int powered) => (data & ~0b10000) | ((powered & 1) << 4);
+
+        public static int MakeData(int shape, int rotation, int reverse = 0, int powered = 0)
+            => SetPowered(SetReverse(SetShape(SetRotation(0, rotation), shape), reverse), powered);
+
+        /// <summary>仅改 shape/rotation，保留 reverse/powered（铺设自动朝向用）。</summary>
+        public static int WithGeometry(int data, int shape, int rotation)
+            => SetShape(SetRotation(data, rotation), shape);
+
+        public static int MeshIndex(int data) {
+            int index = (GetPowered(data) << 4) | (GetReverse(data) << 3) | (GetShape(data) << 2) | GetRotation(data);
+            return MathUtils.Clamp(index, 0, MeshCount - 1);
+        }
 
         public static int RaisedNeighborIndexToRotation(int neighborIndex) => neighborIndex & 3;
+
+        public static int SignToReverse(int sign) => sign >= 0 ? 0 : 1;
+
+        public static int ReverseToSign(int reverse) => reverse != 0 ? -1 : 1;
 
         static void BuildMeshes() {
             if (m_meshesReady) {
@@ -164,43 +199,49 @@ namespace Logistics {
                 flipNormals: false,
                 Color.White);
 
-            for (int shape = 0; shape < 2; shape++) {
-                for (int rotation = 0; rotation < 4; rotation++) {
-                    int index = shape * 4 + rotation;
-                    var mesh = new BlockMesh();
-                    string shapeName = shape == 0 ? "Flat" : "Rise";
-                    Matrix transform = boneAbsoluteTransform
-                        * Matrix.CreateRotationY(MathUtils.DegToRad(90f) * rotation)
-                        * Matrix.CreateTranslation(0.5f, 0f, 0.5f);
-                    mesh.AppendModelMeshPart(
-                        model.FindMesh(shapeName).MeshParts[0],
-                        transform,
-                        makeEmissive: false,
-                        flipWindingOrder: false,
-                        doubleSided: false,
-                        flipNormals: false,
-                        Color.White);
-                    mesh.AppendModelMeshPart(
-                        model.FindMesh("Belt_" + shapeName).MeshParts[0],
-                        transform,
-                        makeEmissive: false,
-                        flipWindingOrder: false,
-                        doubleSided: false,
-                        flipNormals: false,
-                        Color.White);
-                    // rotation 2/3（+Z / +X）相对模型默认 UV 差 180°，不翻则滚动与平直带相反
-                    if ((rotation & 2) != 0) {
-                        mesh.TransformTextureCoordinates(
-                            Matrix.CreateTranslation(-0.25f, -0.5f, 0f)
-                            * Matrix.CreateRotationZ(MathUtils.DegToRad(180f))
-                            * Matrix.CreateTranslation(0.25f, 0.5f, 0f));
+            for (int powered = 0; powered < 2; powered++) {
+                for (int reverse = 0; reverse < 2; reverse++) {
+                    for (int shape = 0; shape < 2; shape++) {
+                        for (int rotation = 0; rotation < 4; rotation++) {
+                            int index = MeshIndex(MakeData(shape, rotation, reverse, powered));
+                            var mesh = new BlockMesh();
+                            string shapeName = shape == 0 ? "Flat" : "Rise";
+                            Matrix transform = boneAbsoluteTransform
+                                * Matrix.CreateRotationY(MathUtils.DegToRad(90f) * rotation)
+                                * Matrix.CreateTranslation(0.5f, 0f, 0.5f);
+                            mesh.AppendModelMeshPart(
+                                model.FindMesh(shapeName).MeshParts[0],
+                                transform,
+                                makeEmissive: false,
+                                flipWindingOrder: false,
+                                doubleSided: false,
+                                flipNormals: false,
+                                Color.White);
+                            mesh.AppendModelMeshPart(
+                                model.FindMesh("Belt_" + shapeName).MeshParts[0],
+                                transform,
+                                makeEmissive: false,
+                                flipWindingOrder: false,
+                                doubleSided: false,
+                                flipNormals: false,
+                                Color.White);
+                            // rotation 2/3 与 reverse 各需 180° UV；两者同时则抵消（对齐 SA + 本模组朝向修正）
+                            bool flipUv = ((rotation & 2) != 0) ^ (reverse != 0);
+                            if (flipUv) {
+                                mesh.TransformTextureCoordinates(
+                                    Matrix.CreateTranslation(-0.25f, -0.5f, 0f)
+                                    * Matrix.CreateRotationZ(MathUtils.DegToRad(180f))
+                                    * Matrix.CreateTranslation(0.25f, 0.5f, 0f));
+                            }
+                            if (powered != 0) {
+                                mesh.TransformTextureCoordinates(Matrix.CreateTranslation(0.5f, 0f, 0f));
+                            }
+                            m_blockMeshes[index] = mesh;
+                            m_collisionBoxes[index] = shape == 0
+                                ? [mesh.CalculateBoundingBox()]
+                                : RiseCollisionBoxes(rotation);
+                        }
                     }
-                    // 采样图集右半区（滚动合成区）
-                    mesh.TransformTextureCoordinates(Matrix.CreateTranslation(0.5f, 0f, 0f));
-                    m_blockMeshes[index] = mesh;
-                    m_collisionBoxes[index] = shape == 0
-                        ? [mesh.CalculateBoundingBox()]
-                        : RiseCollisionBoxes(rotation);
                 }
             }
             m_meshesReady = true;

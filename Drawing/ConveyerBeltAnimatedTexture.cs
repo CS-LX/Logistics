@@ -5,11 +5,16 @@ using Game;
 namespace Logistics {
     /// <summary>
     /// 输送带滚动贴图：底图 + 皮带条合成到固定 RenderTarget。
-    /// RT 在首次取用时即创建，保证地形几何始终引用同一纹理对象，进世界即可滚动。
+    /// 必须在 Update 阶段写入 RT（对齐宿主 SubsystemAnimatedTextures），禁止在 DrawOrder 0 与地形同帧抢 RT。
     /// </summary>
     public static class ConveyerBeltAnimatedTexture {
         public const string BaseTexturePath = "Textures/ConveyerBelt/ConveyerBelt";
         public const string BeltTexturePath = "Textures/ConveyerBelt/Belt";
+
+        /// <summary>
+        /// 贴图 UV 滚动极性。与 reverse=0（Sign=+1）mesh 搭配，使视觉与弧长增大同向。
+        /// </summary>
+        public const float ScrollPolarity = -1f;
 
         static Texture2D? m_base;
         static Texture2D? m_beltStrip;
@@ -17,6 +22,7 @@ namespace Logistics {
         static readonly PrimitivesRenderer2D m_primitives = new();
         static float m_offset;
         static bool m_loaded;
+        static bool m_deviceResetHooked;
 
         public static Texture2D BaseTexture {
             get {
@@ -25,12 +31,12 @@ namespace Logistics {
             }
         }
 
-        /// <summary>地形与世界渲染统一用此 RT（内容每帧更新）。</summary>
+        /// <summary>地形采样用：优先 RT；未就绪时回退底图，避免 GetGeometry(null) 崩 chunk。</summary>
         public static Texture2D Texture {
             get {
                 EnsureLoaded();
                 EnsureAnimatedTarget();
-                return m_animated!;
+                return m_animated ?? m_base!;
             }
         }
 
@@ -41,24 +47,35 @@ namespace Logistics {
             m_base = ContentManager.Get<Texture2D>(BaseTexturePath);
             m_beltStrip = ContentManager.Get<Texture2D>(BeltTexturePath);
             m_loaded = true;
+            HookDeviceReset();
             EnsureAnimatedTarget();
         }
 
-        public static void Update(float dt) {
+        /// <param name="running">任一输送带运转则滚；否则冻结相位（powered=0 格已采静区）。</param>
+        public static void Update(float dt, bool running) {
             EnsureLoaded();
-            m_offset += dt;
-            if (m_offset >= 1f) {
-                m_offset = 0f;
+            if (dt > 0f && running) {
+                m_offset += dt * ScrollPolarity;
+                while (m_offset >= 1f) {
+                    m_offset -= 1f;
+                }
+                while (m_offset < 0f) {
+                    m_offset += 1f;
+                }
             }
+            // 在 Update 合成 RT，供随后地形 Draw 采样（勿放到 IDrawable.Draw）
+            Compose();
         }
 
-        public static void Draw() {
-            EnsureLoaded();
+        static void Compose() {
             EnsureAnimatedTarget();
-            int width = m_base!.Width;
+            if (m_animated == null || m_base == null || m_beltStrip == null) {
+                return;
+            }
+            int width = m_base.Width;
             int height = m_base.Height;
-
             RenderTarget2D previous = Display.RenderTarget;
+            Rectangle scissor = Display.ScissorRectangle;
             try {
                 Display.RenderTarget = m_animated;
                 Display.Clear(new Vector4(Color.Transparent));
@@ -71,7 +88,7 @@ namespace Logistics {
                     BlendState.AlphaBlend,
                     SamplerState.PointClamp);
                 TexturedBatch2D belt = m_primitives.TexturedBatch(
-                    m_beltStrip!,
+                    m_beltStrip,
                     useAlphaTest: false,
                     layer: 1,
                     DepthStencilState.None,
@@ -102,6 +119,7 @@ namespace Logistics {
             }
             finally {
                 Display.RenderTarget = previous;
+                Display.ScissorRectangle = scissor;
             }
         }
 
@@ -110,6 +128,17 @@ namespace Logistics {
                 return;
             }
             m_animated = new RenderTarget2D(m_base.Width, m_base.Height, 1, ColorFormat.Rgba8888, DepthFormat.None);
+        }
+
+        static void HookDeviceReset() {
+            if (m_deviceResetHooked) {
+                return;
+            }
+            Display.DeviceReset += () => {
+                Utilities.Dispose(ref m_animated);
+                m_animated = null;
+            };
+            m_deviceResetHooked = true;
         }
     }
 }

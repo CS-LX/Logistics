@@ -9,8 +9,9 @@ namespace Logistics {
         public Guid Id { get; }
         public Point3 Controller { get; set; }
         public List<Point3> Members { get; } = [];
-        public int Sign { get; init; } = 1;
-        public float SpeedAbs { get; init; } = DefaultSpeedAbs;
+        /// <summary>+1 沿 Members 弧长增大；-1 反向。P6 可交互切换。</summary>
+        public int Sign { get; set; } = 1;
+        public float SpeedAbs { get; set; } = DefaultSpeedAbs;
         public BeltInventory Inventory { get; } = new();
 
         public BeltGroup(Guid id) {
