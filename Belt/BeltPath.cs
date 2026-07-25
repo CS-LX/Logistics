@@ -61,6 +61,19 @@ namespace Logistics {
             return bestPos;
         }
 
+        /// <summary>
+        /// 在途物的绘制姿态：平直段维持轴对齐，坡道段绕带横轴倾斜，让物品贴着带面而不是竖着浮在斜坡上。
+        /// </summary>
+        public static Matrix CreateItemMatrix(Vector3 position, Vector3 tangent) {
+            Vector3 lateral = Vector3.Cross(Vector3.UnitY, tangent);
+            if (MathF.Abs(tangent.Y) < 1e-4f || lateral.LengthSquared() < 1e-6f) {
+                return Matrix.CreateTranslation(position);
+            }
+            // 绕横轴把 up 从竖直转到带面法线；tangent 已归一，抬升量即 sin
+            float pitch = -MathF.Asin(Math.Clamp(tangent.Y, -1f, 1f));
+            return Matrix.CreateFromAxisAngle(Vector3.Normalize(lateral), pitch) * Matrix.CreateTranslation(position);
+        }
+
         public static bool TryGetWorldPose(
             BeltGroup group,
             float beltPosition,

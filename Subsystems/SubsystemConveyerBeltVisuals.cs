@@ -58,7 +58,7 @@ namespace Logistics {
             float visibility = SettingsManager.VisibilityRange;
             foreach (BeltGroup group in m_subsystemBeltGroups.Groups) {
                 foreach (TransportedItem item in group.Inventory.Items) {
-                    if (!BeltPath.TryGetWorldPose(group, item.BeltPosition, item.SideOffset, m_subsystemTerrain, out Vector3 pos, out _)) {
+                    if (!BeltPath.TryGetWorldPose(group, item.BeltPosition, item.SideOffset, m_subsystemTerrain, out Vector3 pos, out Vector3 tangent)) {
                         continue;
                     }
                     if (Vector3.Distance(pos, camera.ViewPosition) > visibility) {
@@ -72,7 +72,7 @@ namespace Logistics {
                         m_drawBlockEnvironmentData.Light = m_subsystemTerrain.Terrain.GetCellLightFast(cell.X, cell.Y, cell.Z);
                     }
                     m_drawBlockEnvironmentData.BillboardDirection = camera.ViewDirection;
-                    var matrix = Matrix.CreateTranslation(pos);
+                    Matrix matrix = BeltPath.CreateItemMatrix(pos, tangent);
                     Block block = BlocksManager.Blocks[Terrain.ExtractContents(item.Value)];
                     block.DrawBlock(
                         m_itemPrimitivesRenderer3D,
