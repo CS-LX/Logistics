@@ -101,7 +101,7 @@ namespace Logistics {
         /// </summary>
         static void GetCellEnds(BeltGroup group, int index, SubsystemTerrain terrain, out Vector3 start, out Vector3 end) {
             Point3 cell = group.Members[index];
-            int data = Terrain.ExtractData(terrain.Terrain.GetCellValueFastChunkExists(cell.X, cell.Y, cell.Z));
+            int data = Terrain.ExtractData(terrain.Terrain.GetCellValueFast(cell.X, cell.Y, cell.Z));
             GetRotationTrack(
                 cell,
                 ConveyerBeltBlock.GetRotation(data),
@@ -159,7 +159,7 @@ namespace Logistics {
         }
 
         static int GetShape(SubsystemTerrain terrain, Point3 p) {
-            int value = terrain.Terrain.GetCellValueFastChunkExists(p.X, p.Y, p.Z);
+            int value = terrain.Terrain.GetCellValueFast(p.X, p.Y, p.Z);
             return ConveyerBeltBlock.GetShape(Terrain.ExtractData(value));
         }
     }

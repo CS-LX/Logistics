@@ -277,6 +277,12 @@ namespace Logistics {
 
         /// <summary>以 seed 为起点，重发现其触及的连通分量并重建 Group。</summary>
         public void RebuildAt(Point3 seed) {
+            // 种子区块未就绪：延后，避免拆组后只扫到半截
+            if (!TryGetCellValue(seed, out _)) {
+                m_dirtyRebuild.Add(seed);
+                return;
+            }
+
             var rediscoverSeeds = new HashSet<Point3> { seed };
             CollectTouchedGroupMembers(seed, rediscoverSeeds);
             foreach (Point3 n in EnumerateBeltNeighborCells(seed)) {
@@ -297,29 +303,50 @@ namespace Logistics {
                     signByGuid[gid] = g.Sign;
                     speedByGuid[gid] = g.SpeedAbs;
                     membersByGuid[gid] = [.. g.Members];
-                    foreach (TransportedItem item in g.Inventory.Items) {
-                        if (BeltPath.TryGetWorldPose(g, item.BeltPosition, item.SideOffset, m_subsystemTerrain, out Vector3 world, out Vector3 tangent)) {
-                            Vector3 travel = g.Sign >= 0 ? tangent : -tangent;
-                            m_rebuildLooseItems.Add(new LooseBeltItem {
-                                Value = item.Value,
-                                Count = item.Count,
-                                Position = world,
-                                Velocity = travel * g.SpeedAbs,
-                                SideOffset = item.SideOffset
-                            });
-                        }
-                        else {
-                            m_rebuildLooseItems.Add(new LooseBeltItem {
-                                Value = item.Value,
-                                Count = item.Count,
-                                Position = new Vector3(g.Controller) + new Vector3(0.5f),
-                                Velocity = item.Velocity,
-                                SideOffset = item.SideOffset
-                            });
-                        }
-                    }
                     foreach (Point3 m in g.Members) {
                         rediscoverSeeds.Add(m);
+                    }
+                }
+            }
+
+            // 触及组仍有成员在未加载区块：整次 Rebuild 延后，禁止拆成残缺组
+            foreach (List<Point3> members in membersByGuid.Values) {
+                foreach (Point3 m in members) {
+                    if (TryGetCellValue(m, out _)) {
+                        continue;
+                    }
+                    m_dirtyRebuild.Add(seed);
+                    foreach (Point3 p in rediscoverSeeds) {
+                        m_dirtyRebuild.Add(p);
+                    }
+                    m_rebuildLooseItems.Clear();
+                    return;
+                }
+            }
+
+            foreach (Guid gid in touchedGuids) {
+                if (!m_groups.TryGetValue(gid, out BeltGroup g)) {
+                    continue;
+                }
+                foreach (TransportedItem item in g.Inventory.Items) {
+                    if (BeltPath.TryGetWorldPose(g, item.BeltPosition, item.SideOffset, m_subsystemTerrain, out Vector3 world, out Vector3 tangent)) {
+                        Vector3 travel = g.Sign >= 0 ? tangent : -tangent;
+                        m_rebuildLooseItems.Add(new LooseBeltItem {
+                            Value = item.Value,
+                            Count = item.Count,
+                            Position = world,
+                            Velocity = travel * g.SpeedAbs,
+                            SideOffset = item.SideOffset
+                        });
+                    }
+                    else {
+                        m_rebuildLooseItems.Add(new LooseBeltItem {
+                            Value = item.Value,
+                            Count = item.Count,
+                            Position = new Vector3(g.Controller) + new Vector3(0.5f),
+                            Velocity = item.Velocity,
+                            SideOffset = item.SideOffset
+                        });
                     }
                 }
             }
@@ -477,7 +504,11 @@ namespace Logistics {
                 BeltGroup group = kv.Value;
                 for (int i = group.Members.Count - 1; i >= 0; i--) {
                     Point3 p = group.Members[i];
-                    if (IsBeltCell(p)) {
+                    // 未加载：保留成员，禁止当成「非带」清掉
+                    if (!TryGetCellValue(p, out int value)) {
+                        continue;
+                    }
+                    if (Terrain.ExtractContents(value) == m_beltIndex) {
                         continue;
                     }
                     group.Members.RemoveAt(i);
@@ -505,17 +536,31 @@ namespace Logistics {
             }
         }
 
-        bool IsBeltCell(Point3 p) {
-            int value = m_subsystemTerrain.Terrain.GetCellValueFastChunkExists(p.X, p.Y, p.Z);
-            return Terrain.ExtractContents(value) == m_beltIndex;
+        /// <summary>区块未加载或 Y 越界时返回 false（勿调用 FastChunkExists）。</summary>
+        bool TryGetCellValue(Point3 p, out int value) {
+            value = 0;
+            if (p.Y is < 0 or >= TerrainChunk.Height) {
+                return false;
+            }
+            TerrainChunk chunk = m_subsystemTerrain.Terrain.GetChunkAtCell(p.X, p.Z);
+            if (chunk == null) {
+                return false;
+            }
+            value = chunk.GetCellValueFast(p.X & 0xF, p.Y, p.Z & 0xF);
+            return true;
         }
+
+        bool IsBeltCell(Point3 p)
+            => TryGetCellValue(p, out int value) && Terrain.ExtractContents(value) == m_beltIndex;
 
         /// <summary>
         /// 同组邻接：沿自身朝向轴（含坡）且双向成立。
         /// 直角贴靠两侧轴不同 → 不同 Group（P3 端点交接）。
         /// </summary>
         IEnumerable<Point3> EnumerateLineNeighbors(Point3 p) {
-            int value = m_subsystemTerrain.Terrain.GetCellValueFastChunkExists(p.X, p.Y, p.Z);
+            if (!TryGetCellValue(p, out int value)) {
+                yield break;
+            }
             int rotation = ConveyerBeltBlock.GetRotation(Terrain.ExtractData(value));
             for (int i = 0; i < 4; i++) {
                 for (int k = 0; k < 3; k++) {
@@ -524,7 +569,9 @@ namespace Logistics {
                     if (!IsBeltCell(n) || !IsAlongAxisStep(p, n, rotation)) {
                         continue;
                     }
-                    int nValue = m_subsystemTerrain.Terrain.GetCellValueFastChunkExists(n.X, n.Y, n.Z);
+                    if (!TryGetCellValue(n, out int nValue)) {
+                        continue;
+                    }
                     int nRotation = ConveyerBeltBlock.GetRotation(Terrain.ExtractData(nValue));
                     if (!IsAlongAxisStep(n, p, nRotation)) {
                         continue;

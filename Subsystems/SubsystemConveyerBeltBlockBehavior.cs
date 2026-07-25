@@ -122,7 +122,7 @@ namespace Logistics {
                     int nx = x + p.X;
                     int ny = y + p.Y;
                     int nz = z + p.Z;
-                    int neighborValue = m_subsystemTerrain.Terrain.GetCellValueFastChunkExists(nx, ny, nz);
+                    int neighborValue = m_subsystemTerrain.Terrain.GetCellValueFast(nx, ny, nz);
                     if (Terrain.ExtractContents(neighborValue) != blockIndex) {
                         continue;
                     }
