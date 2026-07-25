@@ -2,7 +2,6 @@ using Engine;
 using Game;
 using GameEntitySystem;
 using Logistics.Filtering;
-using RecipaediaEX.ComponentsExtra.Implementation;
 using SCIENEW.ProductionIO;
 using TemplatesDatabase;
 
@@ -39,7 +38,7 @@ namespace Logistics {
                 m_inNum
             )) {
                 if (sourceInventory.GetSlotCount(slotIndex) <= 0) continue;
-                int itemCount = GetTransferCount(sourceBlockEntity.Entity, slotIndex, sourceInventory);
+                int itemCount = CraftingTableExtract.GetCount(sourceBlockEntity.Entity, slotIndex, sourceInventory);
                 if (itemCount <= 0) continue;
                 int itemValue = sourceInventory.GetSlotValue(slotIndex);
                 if (!filter.Allows(itemValue)) continue;
@@ -62,13 +61,6 @@ namespace Logistics {
                 }
             }
             return false;
-        }
-
-        static int GetTransferCount(Entity sourceEntity, int slotIndex, IInventory sourceInventory) {
-            var exCraftingTable = sourceEntity.FindComponent<ComponentEXCraftingTable>();
-            if (exCraftingTable == null || slotIndex != exCraftingTable.ResultSlotIndex) return 1;
-            if (exCraftingTable.m_matchedRecipe == null) return 0;
-            return MathUtils.Min(exCraftingTable.m_matchedRecipe.ResultCount, sourceInventory.GetSlotCount(slotIndex));
         }
 
         public override void Load(ValuesDictionary valuesDictionary, IdToEntityMap idToEntityMap) {

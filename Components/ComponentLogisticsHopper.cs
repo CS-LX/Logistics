@@ -147,7 +147,10 @@ namespace Logistics {
                 if (itemValue == 0) {
                     continue;
                 }
-                int take = 1;
+                int take = CraftingTableExtract.GetCount(sourceEntity, slotIndex, sourceInventory);
+                if (take <= 0) {
+                    continue;
+                }
                 sourceInventory.RemoveSlotItems(slotIndex, take);
                 EjectPickable(value, cell, itemValue, take);
                 return;
