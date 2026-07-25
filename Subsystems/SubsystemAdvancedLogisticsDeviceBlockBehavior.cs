@@ -1,6 +1,7 @@
 using Engine;
 using Game;
 using GameEntitySystem;
+using SCIENEW.ProductionIO;
 using SCIENEW.Utils;
 using TemplatesDatabase;
 
@@ -10,6 +11,7 @@ namespace Logistics {
         SubsystemBlockEntities m_subsystemBlockEntities;
         SubsystemPickables m_subsystemPickables;
         SubsystemProjectiles m_subsystemProjectiles;
+        readonly Game.Random m_random = new();
 
         public override int[] HandledBlocks => [BlocksManager.GetBlockIndex<AdvancedLogisticsDeviceBlock>()];
 
@@ -34,7 +36,8 @@ namespace Logistics {
 
         public override void OnBlockGenerated(int value, int x, int y, int z, bool isLoaded) {
             string? entityName = AdvancedLogisticsDeviceBlock.GetDefinition(value).EntityName;
-            if (entityName != null && !BlockEntityUtils.GetBlockEntity(m_subsystemTerrain, new Point3(x, y, z), out _)) {
+            if (entityName != null
+                && !BlockEntityUtils.GetBlockEntity(m_subsystemTerrain, new Point3(x, y, z), out _)) {
                 BlockEntityUtils.CreateBlockEntity(m_subsystemTerrain, entityName, new Point3(x, y, z));
             }
         }
@@ -86,14 +89,41 @@ namespace Logistics {
             }
             var sorter = blockEntity.Entity.FindComponent<ComponentAdvancedSorter>(throwOnError: true);
             int outputFace = sorter.FindOutputFace(worldItem.Value);
-            Vector3 eject = outputFace >= 0
-                ? CellFace.FaceToVector3(outputFace)
-                : -CellFace.FaceToVector3(cellFace.Face);
-            Vector3 position = new Vector3(cellFace.Point) + new Vector3(0.5f);
+            Vector3 eject = outputFace >= 0 ? CellFace.FaceToVector3(outputFace) : -CellFace.FaceToVector3(cellFace.Face);
+            Vector3 center = new Vector3(cellFace.Point) + new Vector3(0.5f);
+            Point3 destCoords = cellFace.Point + new Point3((int)eject.X, (int)eject.Y, (int)eject.Z);
+            var destBlockEntity = m_subsystemBlockEntities.GetBlockEntity(destCoords.X, destCoords.Y, destCoords.Z);
             worldItem.ToRemove = true;
-            if (m_subsystemProjectiles.FireProjectile(worldItem.Value, position + 0.75f * eject, 10f * eject, Vector3.Zero, null) == null) {
-                m_subsystemPickables.AddPickable(worldItem.Value, 1, position + 0.75f * eject, 1f * eject, null);
+            if (LogisticsItemEjection.IsConveyerBeltDest(destBlockEntity, m_subsystemTerrain, destCoords)) {
+                var destInventory = destBlockEntity?.Entity.FindComponent<IInventory>();
+                if (destInventory != null
+                    && ProductionSlotAccess.TryInsertIntoInputSlots(
+                        destBlockEntity.Entity,
+                        destInventory,
+                        worldItem.Value,
+                        1,
+                        explicitOneBasedSlot: 0
+                    )) {
+                    return;
+                }
+                LogisticsItemEjection.DispenseThrow(
+                    m_subsystemPickables,
+                    m_random,
+                    worldItem.Value,
+                    1,
+                    center,
+                    eject
+                );
+                return;
             }
+            LogisticsItemEjection.ProjectThrow(
+                m_subsystemProjectiles,
+                m_subsystemPickables,
+                worldItem.Value,
+                1,
+                center,
+                eject
+            );
         }
     }
 }

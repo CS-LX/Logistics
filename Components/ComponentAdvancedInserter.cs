@@ -14,6 +14,7 @@ namespace Logistics {
         public SubsystemTerrain m_subsystemTerrain;
         public SubsystemBlockEntities m_subsystemBlockEntities;
         public SubsystemPickables m_subsystemPickables;
+        public SubsystemProjectiles m_subsystemProjectiles;
         public int m_inNum;
         public int m_outNum;
         public bool m_dispenseItem = true;
@@ -26,7 +27,6 @@ namespace Logistics {
             int face = AdvancedLogisticsDeviceBlock.GetFacing(cellValue);
             Vector3 faceVector = CellFace.FaceToVector3(face);
             Vector3 center = new Vector3(coordinates) + new Vector3(0.5f);
-            Vector3 dropPosition = center + 0.6f * faceVector;
             Point3 sourceCoords = coordinates - new Point3((int)faceVector.X, (int)faceVector.Y, (int)faceVector.Z);
             Point3 destCoords = coordinates + new Point3((int)faceVector.X, (int)faceVector.Y, (int)faceVector.Z);
             var sourceBlockEntity = m_subsystemBlockEntities.GetBlockEntity(sourceCoords.X, sourceCoords.Y, sourceCoords.Z);
@@ -43,16 +43,23 @@ namespace Logistics {
                 if (itemCount <= 0) continue;
                 int itemValue = sourceInventory.GetSlotValue(slotIndex);
                 if (!filter.Allows(itemValue)) continue;
-                if (TryTransferFromSlot(
-                    sourceInventory,
-                    slotIndex,
+                if (LogisticsItemEjection.TryOutput(
+                    m_subsystemBlockEntities,
+                    m_subsystemTerrain,
+                    m_subsystemPickables,
+                    m_subsystemProjectiles,
+                    m_random,
+                    destCoords,
+                    center,
+                    faceVector,
                     itemValue,
                     itemCount,
-                    destCoords,
-                    dropPosition,
-                    faceVector
-                ))
+                    m_outNum,
+                    m_dispenseItem
+                )) {
+                    sourceInventory.RemoveSlotItems(slotIndex, itemCount);
                     return true;
+                }
             }
             return false;
         }
@@ -64,49 +71,13 @@ namespace Logistics {
             return MathUtils.Min(exCraftingTable.m_matchedRecipe.ResultCount, sourceInventory.GetSlotCount(slotIndex));
         }
 
-        bool TryTransferFromSlot(
-            IInventory sourceInventory,
-            int slotIndex,
-            int itemValue,
-            int itemCount,
-            Point3 destCoords,
-            Vector3 dropPosition,
-            Vector3 faceVector
-        ) {
-            var destBlockEntity = m_subsystemBlockEntities.GetBlockEntity(destCoords.X, destCoords.Y, destCoords.Z);
-            var destInventory = destBlockEntity?.Entity.FindComponent<IInventory>();
-            if (destInventory != null) {
-                if (ProductionSlotAccess.TryInsertIntoInputSlots(
-                    destBlockEntity.Entity,
-                    destInventory,
-                    itemValue,
-                    itemCount,
-                    m_outNum
-                )) {
-                    sourceInventory.RemoveSlotItems(slotIndex, itemCount);
-                    return true;
-                }
-            }
-            else if (m_dispenseItem) {
-                m_subsystemPickables.AddPickable(
-                    itemValue,
-                    itemCount,
-                    dropPosition,
-                    1.8f * (faceVector + m_random.Vector3(0.2f)),
-                    null
-                );
-                sourceInventory.RemoveSlotItems(slotIndex, itemCount);
-                return true;
-            }
-            return false;
-        }
-
         public override void Load(ValuesDictionary valuesDictionary, IdToEntityMap idToEntityMap) {
             base.Load(valuesDictionary, idToEntityMap);
             m_componentBlockEntity = Entity.FindComponent<ComponentBlockEntity>(true);
             m_subsystemTerrain = Project.FindSubsystem<SubsystemTerrain>(true);
             m_subsystemBlockEntities = Project.FindSubsystem<SubsystemBlockEntities>(true);
             m_subsystemPickables = Project.FindSubsystem<SubsystemPickables>(true);
+            m_subsystemProjectiles = Project.FindSubsystem<SubsystemProjectiles>(true);
             m_inNum = valuesDictionary.GetValue("Innum", 0);
             m_outNum = valuesDictionary.GetValue("Outnum", 0);
             m_filterMode = valuesDictionary.GetValue("FilterMode", 0) == (int)FilterMode.Deny
