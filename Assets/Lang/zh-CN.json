@@ -18,8 +18,8 @@
   "LogisticsHopperBlock": {
     "Input": "受料斗",
     "Output": "落料斗",
-    "DescriptionInput": "受料斗：接住掉落物后，尝试塞进贴合机器的进料格；进料格放不下时不接收。",
-    "DescriptionOutput": "落料斗：按间隔从贴合容器取出物品并弹出为掉落物；可选择优先从出料区抓取。"
+    "DescriptionInput": "受料斗：接住掉落物后塞进窄口贴合的机器进料格；进料满了就不吃。贴箱子或储存库时整库接收。空手点开可查看状态。",
+    "DescriptionOutput": "落料斗：按间隔从窄口贴合的容器取出物品，从大口侧弹出为掉落物。默认优先出料区，可在对话框里改模式与间隔。"
   },
   "ContentWidgets": {
     "AdvancedInserterWidget": {
@@ -69,6 +69,21 @@
       "Stopped": "已停止，需要侧面接入机械动力",
       "Gone": "这条输送带已经不在了",
       "NotReady": "输送带刚放好，稍等一下再调向"
+    },
+    "HopperDialog": {
+      "TitleInput": "受料斗",
+      "TitleOutput": "落料斗",
+      "Enabled": "启用",
+      "Close": "关闭",
+      "Gone": "这个料斗已经不在了",
+      "NoTarget": "窄口没有贴到可用的容器",
+      "TargetChest": "贴合储存类容器（整库接收）",
+      "TargetMachine": "贴合机器进料口（仅进料格）",
+      "ModeOutputPreferred": "出料优先",
+      "ModeOutputOnly": "仅出料",
+      "ModeEntire": "整库",
+      "IntervalValue": "{0:0.00} 秒",
+      "StatusOutput": "{0} · 间隔 {1:0.00} 秒"
     }
   },
   "IECraftingRecipes": {

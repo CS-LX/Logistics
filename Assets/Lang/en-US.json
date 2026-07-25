@@ -18,8 +18,8 @@
   "LogisticsHopperBlock": {
     "Input": "Intake Hopper",
     "Output": "Discharge Hopper",
-    "DescriptionInput": "Intake hopper: catches dropped items and tries to insert them into the adjacent machine's input slots; refuses them if those slots cannot take them.",
-    "DescriptionOutput": "Discharge hopper: periodically pulls items from an adjacent container and drops them as pickables; can prefer output slots."
+    "DescriptionInput": "Intake hopper: catches dropped items and inserts them into the machine input slots at the narrow mouth; refuses them if those slots cannot take them. Against chests or storage vaults it fills the whole inventory. Tap with an empty hand to check status.",
+    "DescriptionOutput": "Discharge hopper: periodically pulls items from the container at the narrow mouth and ejects them from the wide mouth as pickables. Prefers output slots by default; open the dialog to change mode and interval."
   },
   "ContentWidgets": {
     "AdvancedInserterWidget": {
@@ -69,6 +69,21 @@
       "Stopped": "Stopped, needs mechanical power on a side",
       "Gone": "This belt is gone",
       "NotReady": "Belt just placed, try again in a moment"
+    },
+    "HopperDialog": {
+      "TitleInput": "Intake Hopper",
+      "TitleOutput": "Discharge Hopper",
+      "Enabled": "Enabled",
+      "Close": "Close",
+      "Gone": "This hopper is gone",
+      "NoTarget": "No usable container at the narrow mouth",
+      "TargetChest": "Attached to storage (whole inventory)",
+      "TargetMachine": "Attached to machine inputs only",
+      "ModeOutputPreferred": "Prefer outputs",
+      "ModeOutputOnly": "Outputs only",
+      "ModeEntire": "Whole inventory",
+      "IntervalValue": "{0:0.00} s",
+      "StatusOutput": "{0} · every {1:0.00} s"
     }
   },
   "IECraftingRecipes": {

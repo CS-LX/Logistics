@@ -56,6 +56,8 @@ namespace Logistics {
 
         public override bool IsFaceTransparent(SubsystemTerrain subsystemTerrain, int face, int value) => true;
 
+        public override bool IsInteractive(SubsystemTerrain subsystemTerrain, int value) => true;
+
         public override bool IsPlacementTransparent_(int value) => true;
 
         public override string GetDisplayName(SubsystemTerrain subsystemTerrain, int value)
