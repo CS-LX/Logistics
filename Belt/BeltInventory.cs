@@ -12,8 +12,6 @@ namespace Logistics {
 
         public IReadOnlyList<TransportedItem> Items => m_items;
 
-        public void Clear() => m_items.Clear();
-
         public void Write(ValuesDictionary vd) {
             ValuesDictionary itemsVd = new();
             for (int i = 0; i < m_items.Count; i++) {

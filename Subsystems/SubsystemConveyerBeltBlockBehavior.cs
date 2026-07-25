@@ -9,14 +9,6 @@ namespace Logistics {
     public class SubsystemConveyerBeltBlockBehavior : SubsystemBlockBehavior {
         public const string SegmentEntityName = "ConveyerBeltSegment";
 
-        /// <summary>与 SCIENEW 铁轨一致：行=水平四向(0=-Z,1=-X,2=+Z,3=+X)，列=同层/上层/下层。</summary>
-        static readonly Point3[,] NeighborOffsets = {
-            { new(0, 0, -1), new(0, 1, -1), new(0, -1, -1) },
-            { new(-1, 0, 0), new(-1, 1, 0), new(-1, -1, 0) },
-            { new(0, 0, 1), new(0, 1, 1), new(0, -1, 1) },
-            { new(1, 0, 0), new(1, 1, 0), new(1, -1, 0) }
-        };
-
         SubsystemTerrain m_subsystemTerrain;
         SubsystemBeltGroups m_subsystemBeltGroups;
         SubsystemBlockEntities m_subsystemBlockEntities;
@@ -44,11 +36,8 @@ namespace Logistics {
                 Project.RemoveEntity(blockEntity.Entity, disposeEntity: true);
             }
             m_subsystemBeltGroups.RequestRebuild(point);
-            for (int i = 0; i < 4; i++) {
-                for (int k = 0; k < 3; k++) {
-                    Point3 o = NeighborOffsets[i, k];
-                    m_subsystemBeltGroups.RequestRebuild(new Point3(x + o.X, y + o.Y, z + o.Z));
-                }
+            foreach (Point3 n in BeltGeometry.EnumerateNeighborCells(point)) {
+                m_subsystemBeltGroups.RequestRebuild(n);
             }
         }
 
@@ -87,40 +76,22 @@ namespace Logistics {
             m_subsystemBeltGroups.RequestRebuild(new Point3(x, y, z));
         }
 
-        /// <summary>P6：点击调向（切换整组 Sign）；附带简要状态。</summary>
+        /// <summary>点击打开调向面板（可透视带面观察动向）。</summary>
         public override bool OnInteract(TerrainRaycastResult raycastResult, ComponentMiner componentMiner) {
             ComponentPlayer player = componentMiner.ComponentPlayer;
             if (player == null) {
                 return false;
             }
             Point3 point = raycastResult.CellFace.Point;
-            if (!m_subsystemBeltGroups.TryGetAt(point, out BeltGroup group)) {
-                player.ComponentGui.DisplaySmallMessage("输送带：尚未编组（等一帧）。按 F2 开调试绘制", Color.White, blinking: true, playNotificationSound: false);
+            if (!m_subsystemBeltGroups.TryGetAt(point, out _)) {
+                player.ComponentGui.DisplaySmallMessage(
+                    LanguageControl.GetContentWidgets(nameof(ConveyerBeltDirectionDialog), "NotReady"),
+                    Color.White,
+                    blinking: true,
+                    playNotificationSound: false);
                 return true;
             }
-            string dirLabel = group.Sign >= 0 ? "正向" : "反向";
-            string runLabel = m_subsystemBeltGroups.IsGroupRunning(group) ? "运转中" : "已停止（需侧面机械能）";
-            DialogsManager.ShowDialog(
-                player.GuiWidget,
-                new MessageDialog(
-                    "输送带方向",
-                    $"当前：{dirLabel} · {runLabel}\n在途 {group.Inventory.Count} 件 · 共 {group.Members.Count} 格",
-                    "切换方向",
-                    "关闭",
-                    button => {
-                        if (button != MessageDialogButton.Button1) {
-                            return;
-                        }
-                        if (!m_subsystemBeltGroups.TryToggleSign(point, out int newSign)) {
-                            return;
-                        }
-                        string now = newSign >= 0 ? "正向" : "反向";
-                        player.ComponentGui.DisplaySmallMessage(
-                            $"输送带已改为{now}",
-                            Color.White,
-                            blinking: true,
-                            playNotificationSound: false);
-                    }));
+            DialogsManager.ShowDialog(player.GuiWidget, new ConveyerBeltDirectionDialog(m_subsystemBeltGroups, point));
             return true;
         }
 
@@ -154,7 +125,7 @@ namespace Logistics {
 
             for (int i = 0; i < 4; i++) {
                 for (int k = 0; k < 3; k++) {
-                    Point3 p = NeighborOffsets[i, k];
+                    Point3 p = BeltGeometry.NeighborOffsets[i, k];
                     int nx = x + p.X;
                     int ny = y + p.Y;
                     int nz = z + p.Z;

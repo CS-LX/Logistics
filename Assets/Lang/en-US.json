@@ -13,7 +13,7 @@
   },
   "ConveyerBeltBlock": {
     "DisplayName": "Conveyor Belt",
-    "Description": "Automatically aligns and climbs like rails (no corners). Belt scrolls visually; item transport comes later."
+    "Description": "Adjacent belts line up automatically and turn into ramps where needed (no corners). Hook mechanical power to a side to make it run, carrying items to the far end; a belt crossing there takes them over, otherwise they are thrown off. Standing on a running belt carries you along, and sneaking keeps you put. Tap with an empty hand to flip the whole line."
   },
   "ContentWidgets": {
     "AdvancedInserterWidget": {
@@ -51,6 +51,18 @@
       "7": "Yellow",
       "8": "Green",
       "9": "Blue"
+    },
+    "ConveyerBeltDirectionDialog": {
+      "Title": "Belt Direction",
+      "Status": "{0} · {1}\n{2} item(s) riding · {3} belt(s) linked",
+      "Toggle": "Flip direction",
+      "Close": "Close",
+      "Forward": "Running forward",
+      "Reverse": "Running backward",
+      "Running": "Moving",
+      "Stopped": "Stopped, needs mechanical power on a side",
+      "Gone": "This belt is gone",
+      "NotReady": "Belt just placed, try again in a moment"
     }
   },
   "IECraftingRecipes": {

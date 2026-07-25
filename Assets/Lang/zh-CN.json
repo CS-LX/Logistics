@@ -13,7 +13,7 @@
   },
   "ConveyerBeltBlock": {
     "DisplayName": "输送带",
-    "Description": "邻接时会自动对齐朝向，并在需要时变成坡道（不会转弯）。皮带会滚动显示，运物逻辑后续接入。"
+    "Description": "相邻的输送带会自动连成一条线，需要时变成坡道（不会转弯）。侧面接上机械动力才会转动，把带上的物品一路送到尽头；尽头处横着另一条带就转交过去，否则把物品抛出。站上去会被带着走，潜行可站稳。空手点一下可以调转整条带的方向。"
   },
   "ContentWidgets": {
     "AdvancedInserterWidget": {
@@ -51,6 +51,18 @@
       "7": "黄",
       "8": "绿",
       "9": "蓝"
+    },
+    "ConveyerBeltDirectionDialog": {
+      "Title": "输送带方向",
+      "Status": "{0} · {1}\n在途 {2} 件 · 共 {3} 格",
+      "Toggle": "切换方向",
+      "Close": "关闭",
+      "Forward": "顺向输送",
+      "Reverse": "逆向输送",
+      "Running": "运转中",
+      "Stopped": "已停止，需要侧面接入机械动力",
+      "Gone": "这条输送带已经不在了",
+      "NotReady": "输送带刚放好，稍等一下再调向"
     }
   },
   "IECraftingRecipes": {
