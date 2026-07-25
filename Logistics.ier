@@ -21,4 +21,9 @@
 		"b"
 		"a"
 	</Recipe>
+	<Recipe Result="ConveyerBeltBlock" ResultCount="4" RequiredHeatLevel="0" a="I-ZincPlate" b="I-Rubber" c="N-BasicMechanicalShell" d="I-SteelGear" Description="[ConveyerBelt]">
+		"aaaa"
+		"bbbb"
+		"acda"
+	</Recipe>
 </Recipes>

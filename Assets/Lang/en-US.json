@@ -71,7 +71,8 @@
       "AdvancedFluidInserter": "Upgrade a fluid inserter with a circuit, logic gates, and zinc-sheet cladding",
       "AdvancedSorter": "Upgrade a sorter with a circuit, logic gates, and zinc-sheet cladding",
       "LogisticsStorageUnitChest": "Assemble a logistics storage unit from a iron chest and zinc plates",
-      "LogisticsStorageUnitSteelChest": "Assemble a logistics storage unit from a steel chest and fewer zinc plates"
+      "LogisticsStorageUnitSteelChest": "Assemble a logistics storage unit from a steel chest and fewer zinc plates",
+      "ConveyerBelt": "Frame zinc plates around a rubber belt face, fit a basic mechanical shell and a gear, and get four conveyor segments"
     }
   }
 }
