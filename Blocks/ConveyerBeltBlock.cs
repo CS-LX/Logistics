@@ -9,22 +9,21 @@ namespace Logistics {
     /// bit0-1 rotation(0..3)，bit2 shape(0 平直 / 1 坡道)，
     /// bit3 reverse(0=Sign+1 / 1=Sign-1)，bit4 powered(0 静贴图左半 / 1 滚动右半)。
     /// 邻接自动对齐只改 shape/rotation，保留 reverse/powered。
+    /// 外观（网格与世界几何）在 <see cref="ConveyerBeltDrawingManager"/>，本类只管数据契约、碰撞与放置。
     /// </summary>
     public class ConveyerBeltBlock : Block {
         public const int Index = 553;
-        public const int MeshCount = 32;
+        /// <summary>data 变体数（powered × reverse × shape × rotation）；网格与碰撞盒按此索引缓存。</summary>
+        public const int DataVariantCount = 32;
 
         public override bool IsIndexDynamic => false;
 
-        static readonly BlockMesh[] m_blockMeshes = new BlockMesh[MeshCount];
-        static readonly BoundingBox[][] m_collisionBoxes = new BoundingBox[MeshCount][];
-        static BlockMesh m_standalone = new();
-        static Texture2D? m_staticTexture;
-        static bool m_meshesReady;
+        static readonly BoundingBox[][] m_collisionBoxes = new BoundingBox[DataVariantCount][];
 
         public override void Initialize() {
             base.Initialize();
-            BuildMeshes();
+            ConveyerBeltDrawingManager.Initialize();
+            BuildCollisionBoxes();
         }
 
         public override string GetCategory(int value) => IEConstants.BlockCategory.Devices;
@@ -93,23 +92,8 @@ namespace Logistics {
             };
         }
 
-        public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z) {
-            int data = MeshIndex(Terrain.ExtractData(value));
-            BlockMesh mesh = m_blockMeshes[data];
-            if (mesh == null) {
-                return;
-            }
-            generator.GenerateShadedMeshVertices(
-                this,
-                x,
-                y,
-                z,
-                mesh,
-                Color.White,
-                null,
-                null,
-                geometry.GetGeometry(ConveyerBeltAnimatedTexture.Texture).SubsetAlphaTest);
-        }
+        public override void GenerateTerrainVertices(BlockGeometryGenerator generator, TerrainGeometry geometry, int value, int x, int y, int z)
+            => ConveyerBeltDrawingManager.GenerateBeltVertices(generator, geometry, x, y, z, Terrain.ExtractData(value));
 
         public override void DrawBlock(
             PrimitivesRenderer3D primitivesRenderer,
@@ -117,10 +101,8 @@ namespace Logistics {
             Color color,
             float size,
             ref Matrix matrix,
-            DrawBlockEnvironmentData environmentData) {
-            m_staticTexture ??= ConveyerBeltAnimatedTexture.BaseTexture;
-            BlocksManager.DrawMeshBlock(primitivesRenderer, m_standalone, m_staticTexture, color, size, ref matrix, environmentData);
-        }
+            DrawBlockEnvironmentData environmentData)
+            => ConveyerBeltDrawingManager.DrawBelt(primitivesRenderer, color, size, ref matrix, environmentData);
 
         public override BlockDebrisParticleSystem CreateDebrisParticleSystem(
             SubsystemTerrain subsystemTerrain,
@@ -162,7 +144,7 @@ namespace Logistics {
 
         public static int MeshIndex(int data) {
             int index = (GetPowered(data) << 4) | (GetReverse(data) << 3) | (GetShape(data) << 2) | GetRotation(data);
-            return MathUtils.Clamp(index, 0, MeshCount - 1);
+            return MathUtils.Clamp(index, 0, DataVariantCount - 1);
         }
 
         public static int RaisedNeighborIndexToRotation(int neighborIndex) => neighborIndex & 3;
@@ -171,81 +153,20 @@ namespace Logistics {
 
         public static int ReverseToSign(int reverse) => reverse != 0 ? -1 : 1;
 
-        static void BuildMeshes() {
-            if (m_meshesReady) {
-                for (int i = 0; i < MeshCount; i++) {
-                    m_blockMeshes[i] = null!;
-                    m_collisionBoxes[i] = null!;
-                }
-                m_standalone = new BlockMesh();
-            }
-
-            Model model = ContentManager.Get<Model>("Models/ConveyerBelt");
-            Matrix boneAbsoluteTransform = BlockMesh.GetBoneAbsoluteTransform(model.FindMesh("Flat").ParentBone);
-            m_standalone.AppendModelMeshPart(
-                model.FindMesh("Flat").MeshParts[0],
-                boneAbsoluteTransform * Matrix.CreateTranslation(0f, -0.5f, 0f),
-                makeEmissive: false,
-                flipWindingOrder: false,
-                doubleSided: false,
-                flipNormals: false,
-                Color.White);
-            m_standalone.AppendModelMeshPart(
-                model.FindMesh("Belt_Flat").MeshParts[0],
-                boneAbsoluteTransform * Matrix.CreateTranslation(0f, -0.5f, 0f),
-                makeEmissive: false,
-                flipWindingOrder: false,
-                doubleSided: false,
-                flipNormals: false,
-                Color.White);
-
+        /// <summary>碰撞盒随外观网格走：平直段取网格包围盒，坡道段用两段台阶近似。</summary>
+        static void BuildCollisionBoxes() {
             for (int powered = 0; powered < 2; powered++) {
                 for (int reverse = 0; reverse < 2; reverse++) {
                     for (int shape = 0; shape < 2; shape++) {
                         for (int rotation = 0; rotation < 4; rotation++) {
-                            int index = MeshIndex(MakeData(shape, rotation, reverse, powered));
-                            var mesh = new BlockMesh();
-                            string shapeName = shape == 0 ? "Flat" : "Rise";
-                            Matrix transform = boneAbsoluteTransform
-                                * Matrix.CreateRotationY(MathUtils.DegToRad(90f) * rotation)
-                                * Matrix.CreateTranslation(0.5f, 0f, 0.5f);
-                            mesh.AppendModelMeshPart(
-                                model.FindMesh(shapeName).MeshParts[0],
-                                transform,
-                                makeEmissive: false,
-                                flipWindingOrder: false,
-                                doubleSided: false,
-                                flipNormals: false,
-                                Color.White);
-                            mesh.AppendModelMeshPart(
-                                model.FindMesh("Belt_" + shapeName).MeshParts[0],
-                                transform,
-                                makeEmissive: false,
-                                flipWindingOrder: false,
-                                doubleSided: false,
-                                flipNormals: false,
-                                Color.White);
-                            // rotation 2/3 与 reverse 各需 180° UV；两者同时则抵消（对齐 SA + 本模组朝向修正）
-                            bool flipUv = ((rotation & 2) != 0) ^ (reverse != 0);
-                            if (flipUv) {
-                                mesh.TransformTextureCoordinates(
-                                    Matrix.CreateTranslation(-0.25f, -0.5f, 0f)
-                                    * Matrix.CreateRotationZ(MathUtils.DegToRad(180f))
-                                    * Matrix.CreateTranslation(0.25f, 0.5f, 0f));
-                            }
-                            if (powered != 0) {
-                                mesh.TransformTextureCoordinates(Matrix.CreateTranslation(0.5f, 0f, 0f));
-                            }
-                            m_blockMeshes[index] = mesh;
-                            m_collisionBoxes[index] = shape == 0
-                                ? [mesh.CalculateBoundingBox()]
+                            int data = MakeData(shape, rotation, reverse, powered);
+                            m_collisionBoxes[MeshIndex(data)] = shape == 0
+                                ? [ConveyerBeltDrawingManager.GetMesh(data).CalculateBoundingBox()]
                                 : RiseCollisionBoxes(rotation);
                         }
                     }
                 }
             }
-            m_meshesReady = true;
-            m_staticTexture = ContentManager.Get<Texture2D>(ConveyerBeltAnimatedTexture.BaseTexturePath);
         }
 
         static BoundingBox[] RiseCollisionBoxes(int rotation) => rotation switch {
