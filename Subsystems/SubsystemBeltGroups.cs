@@ -39,8 +39,12 @@ namespace Logistics {
         SubsystemPickables m_subsystemPickables;
         SubsystemGameInfo m_subsystemGameInfo;
         SubsystemEnginePower m_subsystemEnginePower;
+        SubsystemBodies m_subsystemBodies;
         int m_beltIndex;
         bool m_debugCanDraw;
+
+        /// <summary>对齐 SA：站立加速度系数。</summary>
+        public const float CreaturePushAcceleration = 10f;
 
         public UpdateOrder UpdateOrder => UpdateOrder.Default;
 
@@ -113,6 +117,7 @@ namespace Logistics {
             m_subsystemPickables = Project.FindSubsystem<SubsystemPickables>(throwOnError: true);
             m_subsystemGameInfo = Project.FindSubsystem<SubsystemGameInfo>(throwOnError: true);
             m_subsystemEnginePower = Project.FindSubsystem<SubsystemEnginePower>(throwOnError: true);
+            m_subsystemBodies = Project.FindSubsystem<SubsystemBodies>(throwOnError: true);
             m_beltIndex = BlocksManager.GetBlockIndex<ConveyerBeltBlock>();
             m_drawBlockEnvironmentData.SubsystemTerrain = m_subsystemTerrain;
             m_flatBatch = m_primitivesRenderer3D.FlatBatch(0, DepthStencilState.None);
@@ -166,6 +171,40 @@ namespace Logistics {
                 }
             }
             TickInventories(dt);
+            PushStandingBodies(dt);
+        }
+
+        /// <summary>
+        /// P5：站在运转中的输送带上且非潜行 → 沿带切向加速（含坡）。
+        /// </summary>
+        void PushStandingBodies(float dt) {
+            if (m_groups.Count == 0 || dt <= 0f) {
+                return;
+            }
+            foreach (ComponentBody body in m_subsystemBodies.Bodies) {
+                if (body.IsSneaking || !body.StandingOnValue.HasValue) {
+                    continue;
+                }
+                int standingValue = body.StandingOnValue.Value;
+                if (Terrain.ExtractContents(standingValue) != m_beltIndex) {
+                    continue;
+                }
+                Point3 cell = Terrain.ToCell(body.Position - 0.2f * Vector3.UnitY);
+                if (!TryGetAt(cell, out BeltGroup group) || !IsGroupRunning(group)) {
+                    continue;
+                }
+                if (!BeltPath.TryGetMemberCenterBeltPosition(group, cell, m_subsystemTerrain, out float center, out _)) {
+                    continue;
+                }
+                if (!BeltPath.TryGetWorldPose(group, center, 0f, m_subsystemTerrain, out _, out Vector3 tangent)) {
+                    continue;
+                }
+                Vector3 travel = group.Sign >= 0 ? tangent : -tangent;
+                if (travel.LengthSquared() < 1e-8f) {
+                    continue;
+                }
+                body.Velocity += dt * CreaturePushAcceleration * Vector3.Normalize(travel);
+            }
         }
 
         public void Draw(Camera camera, int drawOrder) {
