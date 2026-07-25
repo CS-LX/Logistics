@@ -15,6 +15,12 @@
     "DisplayName": "Conveyor Belt",
     "Description": "Adjacent belts line up automatically and turn into ramps where needed (no corners). Hook mechanical power to a side to make it run, carrying items to the far end; a belt crossing there takes them over, otherwise they are thrown off. Standing on a running belt carries you along, and sneaking keeps you put. Tap with an empty hand to flip the whole line."
   },
+  "LogisticsHopperBlock": {
+    "Input": "Intake Hopper",
+    "Output": "Discharge Hopper",
+    "DescriptionInput": "Intake hopper: catches dropped items and tries to insert them into the adjacent machine's input slots; refuses them if those slots cannot take them.",
+    "DescriptionOutput": "Discharge hopper: periodically pulls items from an adjacent container and drops them as pickables; can prefer output slots."
+  },
   "ContentWidgets": {
     "AdvancedInserterWidget": {
       "1": "Advanced Inserter",

@@ -94,6 +94,9 @@
     <None Update="Assets\Lang\en-US.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Assets\Models\Hopper.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <Target Name="PackMod" AfterTargets="Build" Condition="'$(LogisticsSkipPack)' != 'true'">

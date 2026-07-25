@@ -11,7 +11,7 @@ namespace Logistics {
     /// 邻接自动对齐只改 shape/rotation，保留 reverse/powered。
     /// 外观（网格与世界几何）在 <see cref="ConveyerBeltDrawingManager"/>，本类只管数据契约、碰撞与放置。
     /// </summary>
-    public class ConveyerBeltBlock : Block {
+    public class ConveyerBeltBlock : Block, IPreferPlacement {
         public const int Index = 553;
         /// <summary>data 变体数（powered × reverse × shape × rotation）；网格与碰撞盒按此索引缓存。</summary>
         public const int DataVariantCount = 32;

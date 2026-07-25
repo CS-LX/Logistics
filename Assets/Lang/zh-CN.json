@@ -15,6 +15,12 @@
     "DisplayName": "输送带",
     "Description": "相邻的输送带会自动连成一条线，需要时变成坡道（不会转弯）。侧面接上机械动力才会转动，把带上的物品一路送到尽头；尽头处横着另一条带就转交过去，否则把物品抛出。站上去会被带着走，潜行可站稳。空手点一下可以调转整条带的方向。"
   },
+  "LogisticsHopperBlock": {
+    "Input": "受料斗",
+    "Output": "落料斗",
+    "DescriptionInput": "受料斗：接住掉落物后，尝试塞进贴合机器的进料格；进料格放不下时不接收。",
+    "DescriptionOutput": "落料斗：按间隔从贴合容器取出物品并弹出为掉落物；可选择优先从出料区抓取。"
+  },
   "ContentWidgets": {
     "AdvancedInserterWidget": {
       "1": "高级抓取机",

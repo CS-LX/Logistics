@@ -8,7 +8,7 @@ namespace Logistics {
     /// 物流存储单元：不透明立方体；地形按面无缝 CT（底图集第 8 格 + 边第 5 格）。
     /// Index 写法对齐 SCIENEW <c>BaseNormalBlock</c>；不与 Transfer / 抓取机等共用 Data 变体。
     /// </summary>
-    public class LogisticsStorageUnitBlock : CubeBlock, IElectricDrillRemovable {
+    public class LogisticsStorageUnitBlock : CubeBlock, IElectricDrillRemovable, IPreferPlacement {
         public static int Index = 552;
         public override bool IsIndexDynamic => false;
 

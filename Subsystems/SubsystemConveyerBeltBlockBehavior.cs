@@ -1,6 +1,7 @@
 using Engine;
 using Game;
 using GameEntitySystem;
+using SCIENEW;
 using SCIENEW.Utils;
 using TemplatesDatabase;
 
@@ -80,6 +81,9 @@ namespace Logistics {
         public override bool OnInteract(TerrainRaycastResult raycastResult, ComponentMiner componentMiner) {
             ComponentPlayer player = componentMiner.ComponentPlayer;
             if (player == null) {
+                return false;
+            }
+            if (BlockInterfaceResolver.ResolveFromValue<IPreferPlacement>(componentMiner.ActiveBlockValue) != null) {
                 return false;
             }
             Point3 point = raycastResult.CellFace.Point;
