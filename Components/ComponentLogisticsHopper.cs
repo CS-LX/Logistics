@@ -1,6 +1,7 @@
 using Engine;
 using Game;
 using GameEntitySystem;
+using RecipaediaEX.ComponentsExtra.Implementation;
 using SCIENEW.ProductionIO;
 using TemplatesDatabase;
 
@@ -147,7 +148,7 @@ namespace Logistics {
                 if (itemValue == 0) {
                     continue;
                 }
-                int take = CraftingTableExtract.GetCount(sourceEntity, slotIndex, sourceInventory);
+                int take = GetTransferCount(sourceEntity, slotIndex, sourceInventory);
                 if (take <= 0) {
                     continue;
                 }
@@ -155,6 +156,17 @@ namespace Logistics {
                 EjectPickable(value, cell, itemValue, take);
                 return;
             }
+        }
+
+        static int GetTransferCount(Entity sourceEntity, int slotIndex, IInventory sourceInventory) {
+            var exCraftingTable = sourceEntity.FindComponent<ComponentEXCraftingTable>();
+            if (exCraftingTable == null || slotIndex != exCraftingTable.ResultSlotIndex) {
+                return 1;
+            }
+            if (exCraftingTable.m_matchedRecipe == null) {
+                return 0;
+            }
+            return MathUtils.Min(exCraftingTable.m_matchedRecipe.ResultCount, sourceInventory.GetSlotCount(slotIndex));
         }
 
         IEnumerable<int> EnumerateExtractSlots(Entity sourceEntity, IInventory sourceInventory) {
