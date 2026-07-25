@@ -7,9 +7,6 @@ namespace Logistics {
     /// 输送带调向：只在屏幕下方摆状态与按钮，不铺面板底，打开时仍能看见带面滚动与在途物。
     /// </summary>
     public class ConveyerBeltDirectionDialog : Dialog {
-        /// <summary>宿主对话框会铺一层近黑遮罩；调向要对照带面，故压到几乎透明。</summary>
-        static readonly Color CoverColor = new(0, 0, 0, 32);
-
         readonly SubsystemBeltGroups m_beltGroups;
         readonly Point3 m_cell;
         readonly LabelWidget m_statusLabel;
@@ -59,13 +56,15 @@ namespace Logistics {
             panel.Children.Add(titleLabel);
             panel.Children.Add(m_statusLabel);
             panel.Children.Add(buttonsPanel);
+            Children.Add(new GradientBackdropWidget());
             Children.Add(panel);
             RefreshStatus();
         }
 
         public override void Update() {
+            // 宿主会铺一层近黑遮罩铺满全屏；这里换成自绘的下浓上透渐变
             if (DialogsManager.m_animationData.TryGetValue(this, out DialogsManager.AnimationData animationData)) {
-                animationData.CoverWidget.FillColor = CoverColor;
+                animationData.CoverWidget.FillColor = Color.Transparent;
             }
             RefreshStatus();
             if (Input.Cancel || Input.Back || m_closeButton.IsClicked) {
@@ -96,6 +95,46 @@ namespace Logistics {
                 running,
                 group.Inventory.Count,
                 group.Members.Count);
+        }
+
+        /// <summary>屏幕下部渐深、上部全透：既衬出按钮与文字，又不挡住带面。</summary>
+        sealed class GradientBackdropWidget : Widget {
+            /// <summary>渐变带占屏幕高度的比例，其余部分不画。</summary>
+            const float BandFraction = 0.42f;
+            const int BottomAlpha = 176;
+
+            public GradientBackdropWidget() {
+                IsHitTestVisible = false;
+                HorizontalAlignment = WidgetAlignment.Stretch;
+                VerticalAlignment = WidgetAlignment.Stretch;
+            }
+
+            public override void MeasureOverride(Vector2 parentAvailableSize) {
+                IsDrawRequired = true;
+                DesiredSize = new Vector2(float.PositiveInfinity);
+            }
+
+            public override void Draw(DrawContext dc) {
+                float bandHeight = ActualSize.Y * BandFraction;
+                if (bandHeight <= 0f || ActualSize.X <= 0f) {
+                    return;
+                }
+                Matrix m = GlobalTransform;
+                float bandTop = ActualSize.Y - bandHeight;
+                Vector2 topLeft = new(0f, bandTop);
+                Vector2 topRight = new(ActualSize.X, bandTop);
+                Vector2 bottomRight = ActualSize;
+                Vector2 bottomLeft = new(0f, ActualSize.Y);
+                Vector2.Transform(ref topLeft, ref m, out Vector2 p1);
+                Vector2.Transform(ref topRight, ref m, out Vector2 p2);
+                Vector2.Transform(ref bottomRight, ref m, out Vector2 p3);
+                Vector2.Transform(ref bottomLeft, ref m, out Vector2 p4);
+                Color top = new Color(0, 0, 0, 0) * GlobalColorTransform;
+                Color bottom = new Color(0, 0, 0, BottomAlpha) * GlobalColorTransform;
+                dc.PrimitivesRenderer2D
+                    .FlatBatch(1, DepthStencilState.None)
+                    .QueueQuad(p1, p2, p3, p4, 0f, top, top, bottom, bottom);
+            }
         }
     }
 }

@@ -53,7 +53,7 @@
       "9": "Blue"
     },
     "ConveyerBeltDirectionDialog": {
-      "Title": "Belt Direction",
+      "Title": "Conveyor Belt",
       "Status": "{0} · {1}\n{2} item(s) riding · {3} belt(s) linked",
       "Toggle": "Flip direction",
       "Close": "Close",

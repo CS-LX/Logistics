@@ -53,7 +53,7 @@
       "9": "蓝"
     },
     "ConveyerBeltDirectionDialog": {
-      "Title": "输送带方向",
+      "Title": "输送带",
       "Status": "{0} · {1}\n在途 {2} 件 · 共 {3} 格",
       "Toggle": "切换方向",
       "Close": "关闭",

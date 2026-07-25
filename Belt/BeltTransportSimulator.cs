@@ -167,7 +167,7 @@ namespace Logistics {
             Vector3 bestTravel = default;
             float bestScore = float.MaxValue;
 
-            foreach (Point3 n in BeltGeometry.EnumerateNeighborCells(exitCell)) {
+            foreach (Point3 n in EnumerateForwardCells(exitCell, exitAlongZ, sourceTravel)) {
                 if (!m_registry.TryGetAt(n, out BeltGroup target) || target.Id == source.Id) {
                     continue;
                 }
@@ -198,7 +198,9 @@ namespace Logistics {
                     continue;
                 }
 
-                Vector3 lateral = Vector3.Cross(Vector3.UnitY, targetTravel);
+                // SideOffset 由绘制侧按「路径切向」解释（见 BeltPath.TryGetWorldPose），
+                // 这里必须用同一基准；用行进方向会让反向组的入带侧左右颠倒。
+                Vector3 lateral = Vector3.Cross(Vector3.UnitY, entryTangent);
                 if (lateral.LengthSquared() < 1e-6f) {
                     lateral = Vector3.UnitX;
                 }
@@ -235,6 +237,30 @@ namespace Logistics {
             item.SideOffset = 0f;
             item.Velocity = inheritVelocity;
             return source.Inventory.TryInsert(item);
+        }
+
+        /// <summary>
+        /// 只认出口格「正前方」的一格（坡道再带上下一层）：带子指着空地就该把物品抛下，
+        /// 侧面或背后贴着的横向带不得截走。
+        /// </summary>
+        static IEnumerable<Point3> EnumerateForwardCells(Point3 exitCell, bool alongZ, Vector3 travel) {
+            int dx = 0;
+            int dz = 0;
+            if (alongZ) {
+                if (MathF.Abs(travel.Z) < 1e-4f) {
+                    yield break;
+                }
+                dz = travel.Z > 0f ? 1 : -1;
+            }
+            else {
+                if (MathF.Abs(travel.X) < 1e-4f) {
+                    yield break;
+                }
+                dx = travel.X > 0f ? 1 : -1;
+            }
+            yield return new Point3(exitCell.X + dx, exitCell.Y, exitCell.Z + dz);
+            yield return new Point3(exitCell.X + dx, exitCell.Y + 1, exitCell.Z + dz);
+            yield return new Point3(exitCell.X + dx, exitCell.Y - 1, exitCell.Z + dz);
         }
 
         /// <summary>对齐抓取机吐出思路，但缩小偏置/初速，减少带上图标→掉落物的断层感。</summary>
