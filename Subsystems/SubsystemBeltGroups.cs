@@ -103,12 +103,16 @@ namespace Logistics {
                 count);
         }
 
-        /// <summary>读某带格窗口内最近的一件在途物，不取走。</summary>
-        public bool TryPeekItem(Point3 cell, out int value, out int count) {
+        /// <summary>
+        /// 读取货点附近最近的一件在途物，不取走。取货点与插入落点同一套语义
+        /// （正对端口取那一端，侧向取格心），<paramref name="reach"/> 限定够得着多远，
+        /// 免得物品刚进这格就被隔空取走。
+        /// </summary>
+        public bool TryPeekItemFrom(Point3 cell, Vector3 sourceCenter, float reach, out int value, out int count) {
             value = 0;
             count = 0;
-            if (!BeltSegmentInventory.TryResolve(this, m_subsystemTerrain, cell, out BeltGroup group, out float center)
-                || !BeltSegmentInventory.TryPeek(group, center, out TransportedItem item, out _)) {
+            if (!TryResolveTakePoint(cell, sourceCenter, out BeltGroup group, out float takePoint)
+                || !BeltSegmentInventory.TryPeek(group, takePoint, out TransportedItem item, out _, reach)) {
                 return false;
             }
             value = item.Value;
@@ -117,11 +121,27 @@ namespace Logistics {
         }
 
         /// <returns>实际取走的数量。</returns>
-        public int RemoveItem(Point3 cell, int count) {
-            if (!BeltSegmentInventory.TryResolve(this, m_subsystemTerrain, cell, out BeltGroup group, out float center)) {
+        public int RemoveItemFrom(Point3 cell, Vector3 sourceCenter, float reach, int count) {
+            if (!TryResolveTakePoint(cell, sourceCenter, out BeltGroup group, out float takePoint)) {
                 return 0;
             }
-            return BeltSegmentInventory.TryRemove(group, center, count);
+            return BeltSegmentInventory.TryRemove(group, takePoint, count, reach);
+        }
+
+        /// <summary>取货点：与插入落点同一判据，落在靠 <paramref name="sourceCenter"/> 那一端或格心。</summary>
+        bool TryResolveTakePoint(Point3 cell, Vector3 sourceCenter, out BeltGroup group, out float takePoint) {
+            takePoint = 0f;
+            if (!BeltSegmentInventory.TryResolveSpan(
+                    this,
+                    m_subsystemTerrain,
+                    cell,
+                    out group,
+                    out float spanStart,
+                    out float spanLength)) {
+                return false;
+            }
+            takePoint = spanStart + spanLength * ResolveCellFraction(group, cell, spanStart, spanLength, sourceCenter);
+            return true;
         }
 
         bool TryInsertInSpan(BeltGroup group, float spanStart, float spanLength, float cellFraction, int value, int count) {

@@ -16,6 +16,13 @@ namespace Logistics {
         public const float MinIntervalSeconds = 0.05f;
         public const float MaxIntervalSeconds = 2f;
 
+        /// <summary>
+        /// 从带上取货够得着的距离（弧长）。要大于默认节拍内带走过的路程
+        /// （<see cref="BeltGroup.DefaultSpeedAbs"/> × <see cref="DefaultIntervalSeconds"/>），
+        /// 否则物品会在两次尝试之间冲过取货点。
+        /// </summary>
+        public const float BeltReach = 0.4f;
+
         public float IntervalSeconds {
             get => m_intervalSeconds;
             set => m_intervalSeconds = ClampInterval(value);
@@ -186,11 +193,22 @@ namespace Logistics {
             }
         }
 
-        /// <summary>受料：从大口侧输送带取一件，塞进窄口贴合的容器；塞不下就不取。</summary>
+        /// <summary>
+        /// 受料：等物品滚到斗口跟前（<see cref="BeltReach"/> 以内）再取，塞进窄口贴合的容器；
+        /// 塞不下就不取，物品继续跟着带走。
+        /// </summary>
         void TryIntakeFromBelt(int value, Point3 cell) {
             if (!TryGetMouthBeltCell(value, cell, out Point3 mouthCell)
-                || !TryGetAttachedInventory(value, cell, out Entity destEntity, out IInventory destInventory)
-                || !m_subsystemBeltGroups.TryPeekItem(mouthCell, out int itemValue, out int count)) {
+                || !TryGetAttachedInventory(value, cell, out Entity destEntity, out IInventory destInventory)) {
+                return;
+            }
+            Vector3 hopperCenter = new Vector3(cell) + new Vector3(0.5f);
+            if (!m_subsystemBeltGroups.TryPeekItemFrom(
+                    mouthCell,
+                    hopperCenter,
+                    BeltReach,
+                    out int itemValue,
+                    out int count)) {
                 return;
             }
             if (!TryInsertIntoAttached(destEntity, destInventory, itemValue, count, out int remain)) {
@@ -198,7 +216,7 @@ namespace Logistics {
             }
             int moved = count - remain;
             if (moved > 0) {
-                m_subsystemBeltGroups.RemoveItem(mouthCell, moved);
+                m_subsystemBeltGroups.RemoveItemFrom(mouthCell, hopperCenter, BeltReach, moved);
             }
         }
 

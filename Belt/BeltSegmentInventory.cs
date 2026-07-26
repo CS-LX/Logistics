@@ -42,9 +42,15 @@ namespace Logistics {
             return BeltPath.TryGetMemberSpan(group, cell, terrain, out spanStart, out spanLength);
         }
 
-        public static bool TryPeek(BeltGroup group, float center, out TransportedItem item, out int index) {
+        /// <summary><paramref name="halfWidth"/> 可收窄取货范围，例如只够得着靠自己那一端。</summary>
+        public static bool TryPeek(
+            BeltGroup group,
+            float center,
+            out TransportedItem item,
+            out int index,
+            float halfWidth = WindowHalf) {
             item = null;
-            index = group.Inventory.FindClosestInWindow(center, WindowHalf);
+            index = group.Inventory.FindClosestInWindow(center, halfWidth);
             if (index < 0) {
                 return false;
             }
@@ -70,8 +76,8 @@ namespace Logistics {
             });
         }
 
-        public static int TryRemove(BeltGroup group, float center, int count) {
-            if (!TryPeek(group, center, out _, out int index)) {
+        public static int TryRemove(BeltGroup group, float center, int count, float halfWidth = WindowHalf) {
+            if (!TryPeek(group, center, out _, out int index, halfWidth)) {
                 return 0;
             }
             return group.Inventory.RemoveAt(index, count);

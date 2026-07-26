@@ -18,8 +18,8 @@
   "LogisticsHopperBlock": {
     "Input": "Intake Hopper",
     "Output": "Discharge Hopper",
-    "DescriptionInput": "Intake hopper: catches dropped items and inserts them into the machine input slots at the narrow mouth; refuses them if those slots cannot take them. Facing a belt head-on, it lifts items straight off the belt on every interval, and a length of belt runs on into the mouth. Against chests or storage vaults it fills the whole inventory. Tap with an empty hand to check status.",
-    "DescriptionOutput": "Discharge hopper: periodically pulls items from the container at the narrow mouth. Facing a belt head-on, items go straight onto the belt (and wait in the container while the belt is full), with a length of belt running on into the mouth; otherwise they are ejected from the wide mouth as pickables. Prefers output slots by default; open the dialog to change mode and interval."
+    "DescriptionInput": "Intake hopper: catches dropped items and inserts them into the machine input slots at the narrow mouth; refuses them if those slots cannot take them. Facing a belt head-on, the belt runs right into the mouth and items are swallowed once they arrive, never hitting the ground. Against chests or storage vaults it fills the whole inventory. Tap with an empty hand to check status.",
+    "DescriptionOutput": "Discharge hopper: periodically pulls items from the container at the narrow mouth. Facing a belt head-on, the belt runs right into the mouth and items drop straight onto it to be carried away; while the belt is full they wait in the container. With no belt there they are ejected from the wide mouth as pickables. Prefers output slots by default; open the dialog to change mode and interval."
   },
   "ContentWidgets": {
     "AdvancedInserterWidget": {
@@ -84,7 +84,7 @@
       "ModeEntire": "Whole inventory",
       "IntervalValue": "{0:0.00} s",
       "StatusOutput": "{0} · every {1:0.00} s",
-      "MouthBelt": "Wide mouth meets a belt; items move on and off it directly",
+      "MouthBelt": "Wide mouth is on a belt; items move on and off without dropping",
       "MouthOpen": "Wide mouth faces open space; items travel as drops"
     }
   },
