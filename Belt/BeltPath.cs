@@ -2,7 +2,14 @@ using Engine;
 using Game;
 
 namespace Logistics {
-    /// <summary>沿 Group.Members 顺序的弧长路径（单位 ≈ 方块；坡 ≈ √2）。</summary>
+    /// <summary>
+    /// 沿 Group.Members 顺序的弧长路径（单位 ≈ 方块；坡 ≈ √2）。
+    /// <para>
+    /// **不变量**：弧长正向恒为 <see cref="BeltGeometry.Compare"/> 递增方向（成员由
+    /// <see cref="BeltTopology.OrderMembers"/> 从坐标序最小端排起）。`Sign` 是相对这根轴的符号，
+    /// 格上 `reverse`、滚动 UV、铺设朝向都以此为准，单格组也不例外。
+    /// </para>
+    /// </summary>
     public static class BeltPath {
         public const float SurfaceHeight = 3f / 16f;
         public const float ItemDrawSize = 0.3f; // 对齐 Pickable.Draw 的 drawBlockSize
@@ -124,14 +131,16 @@ namespace Logistics {
         /// <summary>
         /// 每格用朝向/坡道轨迹（对齐 SA MovementTrack），再按 Members 邻接调转起终点，
         /// 避免坡道低端被中心镜像算到地底以下。
+        /// 没有邻居可参照时（单格组）按类注释的不变量定向。
         /// </summary>
         static void GetCellEnds(BeltGroup group, int index, SubsystemTerrain terrain, out Vector3 start, out Vector3 end) {
             Point3 cell = group.Members[index];
             int data = Terrain.ExtractData(terrain.Terrain.GetCellValueFast(cell.X, cell.Y, cell.Z));
+            int shape = ConveyerBeltBlock.GetShape(data);
             GetRotationTrack(
                 cell,
                 ConveyerBeltBlock.GetRotation(data),
-                ConveyerBeltBlock.GetShape(data),
+                shape,
                 out start,
                 out end);
 
@@ -148,6 +157,12 @@ namespace Logistics {
                 if (Vector3.DistanceSquared(end, target) < Vector3.DistanceSquared(start, target)) {
                     (start, end) = (end, start);
                 }
+            }
+            // 单格组：GetRotationTrack 的平直轨朝坐标减小，与多格被邻居调转后的正向相反，
+            // 会让 Sign / 滚动外观 / 实际运物在「只有一格」时对不上。坡道必有同轴邻居，
+            // 走不到这里，故只按水平坐标定向。
+            else if (shape == 0 && end.X + end.Z < start.X + start.Z) {
+                (start, end) = (end, start);
             }
         }
 

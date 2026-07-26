@@ -75,16 +75,18 @@ namespace Logistics {
             int value,
             TerrainRaycastResult raycastResult) {
             Vector3 forward = componentMiner.ComponentCreature.ComponentCreatureModel.EyeRotation.GetForwardVector();
-            // 轴：|X| 大 → 沿 X(rotation 1)；否则沿 Z(rotation 0)。reverse 对齐视线，使落地带物流朝向玩家面前。
+            // 轴：|X| 大 → 沿 X(rotation 1)；否则沿 Z(rotation 0)。
+            // 弧长正向恒为坐标增大（见 BeltPath 不变量），故视线朝正轴时取 Sign=+1（reverse=0），
+            // 使落地带物流朝玩家面前，且接长后不掉头。
             int rotation;
             int reverse;
             if (MathUtils.Abs(forward.X) > MathUtils.Abs(forward.Z)) {
                 rotation = 1;
-                reverse = forward.X > 0f ? 1 : 0;
+                reverse = forward.X > 0f ? 0 : 1;
             }
             else {
                 rotation = 0;
-                reverse = forward.Z > 0f ? 1 : 0;
+                reverse = forward.Z > 0f ? 0 : 1;
             }
             return new BlockPlacementData {
                 Value = Terrain.MakeBlockValue(BlockIndex, 0, MakeData(0, rotation, reverse, powered: 0)),
