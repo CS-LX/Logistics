@@ -93,7 +93,9 @@
       "AdvancedSorter": "给分拣机加装电路、逻辑门，并用锌片包覆，改造成高级分拣机",
       "LogisticsStorageUnitChest": "用铁箱子与锌板拼成物流存储单元",
       "LogisticsStorageUnitSteelChest": "用钢箱子与较少锌板拼成物流存储单元",
-      "ConveyerBelt": "用锌板作边框，夹一层橡胶带面，再配上基础机壳与齿轮，做出四段输送带"
+      "ConveyerBelt": "用锌板作边框，夹一层橡胶带面，再配上基础机壳与齿轮，做出四段输送带",
+      "LogisticsHopperOutput": "用锌板围成大口朝上的斗壳，中间装上抓取机，做成落料斗",
+      "LogisticsHopperInput": "把锌板大口翻到下面，中间同样装上抓取机，做成受料斗"
     }
   }
 }

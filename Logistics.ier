@@ -26,4 +26,14 @@
 		"bbbb"
 		"acda"
 	</Recipe>
+	<Recipe Result="LogisticsHopperBlock:8" ResultCount="1" RequiredHeatLevel="0" a="I-ZincPlate" b="D-InserterDevice" Description="[LogisticsHopperOutput]">
+		"aaa"
+		" b "
+		" a "
+	</Recipe>
+	<Recipe Result="LogisticsHopperBlock:0" ResultCount="1" RequiredHeatLevel="0" a="I-ZincPlate" b="D-InserterDevice" Description="[LogisticsHopperInput]">
+		" a "
+		" b "
+		"aaa"
+	</Recipe>
 </Recipes>

@@ -204,7 +204,10 @@ namespace Logistics {
             int facing = LogisticsHopperBlock.GetFacing(value);
             Vector3 mouth = CellFace.FaceToVector3(facing);
             Vector3 position = new Vector3(cell) + new Vector3(0.5f) + 0.1f * mouth;
-            Vector3 velocity = 0.5f * (mouth + m_random.Vector3(0.12f));
+            // 朝上：按宿主 Pickable 空气阻力+重力，初速使顶点约在正上方一格中心（其余朝向保持轻推）
+            Vector3 velocity = facing == 4
+                ? new Vector3(0f, 4f, 0f)
+                : 0.5f * (mouth + m_random.Vector3(0.12f));
             m_subsystemPickables.AddPickable(itemValue, count, position, velocity, null);
         }
 

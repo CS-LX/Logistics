@@ -72,8 +72,9 @@ namespace Logistics {
             => GetVariant(value) == LogisticsHopperVariant.Input ? "logisticshopperinput" : "logisticshopperoutput";
 
         public override IEnumerable<int> GetCreativeValues() {
-            yield return Terrain.MakeBlockValue(BlockIndex, 0, MakeData(LogisticsHopperVariant.Input, 4));
-            yield return Terrain.MakeBlockValue(BlockIndex, 0, MakeData(LogisticsHopperVariant.Output, 4));
+            // facing 须与掉落 / .ier Result Data 一致，否则图鉴 BlockItem.Match 对不上配方。
+            yield return Terrain.MakeBlockValue(BlockIndex, 0, MakeData(LogisticsHopperVariant.Input, 0));
+            yield return Terrain.MakeBlockValue(BlockIndex, 0, MakeData(LogisticsHopperVariant.Output, 0));
         }
 
         public override void GetDropValues(
