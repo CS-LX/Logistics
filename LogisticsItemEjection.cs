@@ -57,21 +57,15 @@ namespace Logistics {
         }
 
         /// <summary>
-        /// 向邻格输出：传送带优先插入，满则吐出；其它库存走插入；无库存则分拣投射。
+        /// 向邻格输出：传送带按来料方向就位插入（正对端口落在端口处），满则吐出；
+        /// 其它库存走插入；无库存则分拣投射。
         /// </summary>
-        public static bool TryOutput(SubsystemBlockEntities blockEntities, SubsystemTerrain terrain, SubsystemPickables pickables, SubsystemProjectiles projectiles, Game.Random random, Point3 destCoords, Vector3 deviceCenter, Vector3 faceVector, int itemValue, int itemCount, int outSlotOneBased, bool allowWorldEject) {
+        public static bool TryOutput(SubsystemBlockEntities blockEntities, SubsystemTerrain terrain, SubsystemPickables pickables, SubsystemProjectiles projectiles, SubsystemBeltGroups beltGroups, Game.Random random, Point3 destCoords, Vector3 deviceCenter, Vector3 faceVector, int itemValue, int itemCount, int outSlotOneBased, bool allowWorldEject) {
             var destBlockEntity = blockEntities.GetBlockEntity(destCoords.X, destCoords.Y, destCoords.Z);
             var destInventory = destBlockEntity?.Entity.FindComponent<IInventory>();
             bool isBelt = IsConveyerBeltDest(destBlockEntity, terrain, destCoords);
             if (isBelt) {
-                if (destInventory != null
-                    && ProductionSlotAccess.TryInsertIntoInputSlots(
-                        destBlockEntity.Entity,
-                        destInventory,
-                        itemValue,
-                        itemCount,
-                        outSlotOneBased
-                    )) {
+                if (beltGroups != null && beltGroups.TryInsertItemFrom(destCoords, deviceCenter, itemValue, itemCount)) {
                     return true;
                 }
                 if (!allowWorldEject) {

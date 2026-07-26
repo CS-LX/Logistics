@@ -2,7 +2,6 @@ using Engine;
 using Game;
 using GameEntitySystem;
 using SCIENEW;
-using SCIENEW.ProductionIO;
 using SCIENEW.Utils;
 using TemplatesDatabase;
 
@@ -12,6 +11,7 @@ namespace Logistics {
         SubsystemBlockEntities m_subsystemBlockEntities;
         SubsystemPickables m_subsystemPickables;
         SubsystemProjectiles m_subsystemProjectiles;
+        SubsystemBeltGroups m_subsystemBeltGroups;
         readonly Game.Random m_random = new();
 
         public override int[] HandledBlocks => [BlocksManager.GetBlockIndex<AdvancedLogisticsDeviceBlock>()];
@@ -22,6 +22,7 @@ namespace Logistics {
             m_subsystemBlockEntities = Project.FindSubsystem<SubsystemBlockEntities>(throwOnError: true);
             m_subsystemPickables = Project.FindSubsystem<SubsystemPickables>(throwOnError: true);
             m_subsystemProjectiles = Project.FindSubsystem<SubsystemProjectiles>(throwOnError: true);
+            m_subsystemBeltGroups = Project.FindSubsystem<SubsystemBeltGroups>(throwOnError: true);
         }
 
         public override void OnBlockAdded(int value, int oldValue, int x, int y, int z) {
@@ -99,15 +100,7 @@ namespace Logistics {
             var destBlockEntity = m_subsystemBlockEntities.GetBlockEntity(destCoords.X, destCoords.Y, destCoords.Z);
             worldItem.ToRemove = true;
             if (LogisticsItemEjection.IsConveyerBeltDest(destBlockEntity, m_subsystemTerrain, destCoords)) {
-                var destInventory = destBlockEntity?.Entity.FindComponent<IInventory>();
-                if (destInventory != null
-                    && ProductionSlotAccess.TryInsertIntoInputSlots(
-                        destBlockEntity.Entity,
-                        destInventory,
-                        worldItem.Value,
-                        1,
-                        explicitOneBasedSlot: 0
-                    )) {
+                if (m_subsystemBeltGroups.TryInsertItemFrom(destCoords, center, worldItem.Value, 1)) {
                     return;
                 }
                 LogisticsItemEjection.DispenseThrow(

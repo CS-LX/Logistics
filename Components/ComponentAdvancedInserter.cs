@@ -15,6 +15,7 @@ namespace Logistics {
         public SubsystemBlockEntities m_subsystemBlockEntities;
         public SubsystemPickables m_subsystemPickables;
         public SubsystemProjectiles m_subsystemProjectiles;
+        public SubsystemBeltGroups m_subsystemBeltGroups;
         public int m_inNum;
         public int m_outNum;
         public bool m_dispenseItem = true;
@@ -48,6 +49,7 @@ namespace Logistics {
                     m_subsystemTerrain,
                     m_subsystemPickables,
                     m_subsystemProjectiles,
+                    m_subsystemBeltGroups,
                     m_random,
                     destCoords,
                     center,
@@ -78,6 +80,7 @@ namespace Logistics {
             m_subsystemBlockEntities = Project.FindSubsystem<SubsystemBlockEntities>(true);
             m_subsystemPickables = Project.FindSubsystem<SubsystemPickables>(true);
             m_subsystemProjectiles = Project.FindSubsystem<SubsystemProjectiles>(true);
+            m_subsystemBeltGroups = Project.FindSubsystem<SubsystemBeltGroups>(true);
             m_inNum = valuesDictionary.GetValue("Innum", 0);
             m_outNum = valuesDictionary.GetValue("Outnum", 0);
             m_filterMode = valuesDictionary.GetValue("FilterMode", 0) == (int)FilterMode.Deny

@@ -19,24 +19,37 @@ namespace Logistics {
             return sum;
         }
 
-        /// <summary>某成员格弧长中心（前缀和 + 半格长），供 Segment 窗口锚定。</summary>
+        /// <summary>某成员格占据的弧长区间 [start, start + length]，供格内定位插入。</summary>
+        public static bool TryGetMemberSpan(
+            BeltGroup group,
+            Point3 cell,
+            SubsystemTerrain terrain,
+            out float start,
+            out float length) {
+            start = 0f;
+            length = 0f;
+            int memberIndex = group.Members.IndexOf(cell);
+            if (memberIndex < 0) {
+                return false;
+            }
+            for (int i = 0; i < memberIndex; i++) {
+                start += CellLength(GetShape(terrain, group.Members[i]));
+            }
+            length = CellLength(GetShape(terrain, group.Members[memberIndex]));
+            return true;
+        }
+
+        /// <summary>某成员格弧长中心，供 Segment 窗口锚定。</summary>
         public static bool TryGetMemberCenterBeltPosition(
             BeltGroup group,
             Point3 cell,
             SubsystemTerrain terrain,
-            out float center,
-            out int memberIndex) {
-            center = 0f;
-            memberIndex = group.Members.IndexOf(cell);
-            if (memberIndex < 0) {
+            out float center) {
+            if (!TryGetMemberSpan(group, cell, terrain, out float start, out float length)) {
+                center = 0f;
                 return false;
             }
-            float offset = 0f;
-            for (int i = 0; i < memberIndex; i++) {
-                offset += CellLength(GetShape(terrain, group.Members[i]));
-            }
-            float len = CellLength(GetShape(terrain, group.Members[memberIndex]));
-            center = offset + len * 0.5f;
+            center = start + length * 0.5f;
             return true;
         }
 

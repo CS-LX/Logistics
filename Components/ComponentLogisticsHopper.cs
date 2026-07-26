@@ -7,7 +7,8 @@ using TemplatesDatabase;
 
 namespace Logistics {
     /// <summary>
-    /// 料斗逻辑：落料定时吐掉落物；受料严 Input（无 Input 声明则整库）。
+    /// 料斗逻辑：落料定时出货（大口对着输送带则直接放到带上，否则吐掉落物）；
+    /// 受料吞掉落物或从大口侧输送带取货，塞进窄口贴合的 Input（无 Input 声明则整库）。
     /// 朝向/变体每帧读地形 Data。
     /// </summary>
     public class ComponentLogisticsHopper : Component, IUpdateable {
@@ -37,6 +38,7 @@ namespace Logistics {
         SubsystemBlockEntities m_subsystemBlockEntities;
         SubsystemPickables m_subsystemPickables;
         SubsystemTime m_subsystemTime;
+        SubsystemBeltGroups m_subsystemBeltGroups;
         float m_intervalSeconds = DefaultIntervalSeconds;
         HopperExtractMode m_extractMode = HopperExtractMode.OutputPreferred;
         bool m_enabled = true;
@@ -49,6 +51,7 @@ namespace Logistics {
             m_subsystemBlockEntities = Project.FindSubsystem<SubsystemBlockEntities>(true);
             m_subsystemPickables = Project.FindSubsystem<SubsystemPickables>(true);
             m_subsystemTime = Project.FindSubsystem<SubsystemTime>(true);
+            m_subsystemBeltGroups = Project.FindSubsystem<SubsystemBeltGroups>(true);
             m_intervalSeconds = ClampInterval(valuesDictionary.GetValue("IntervalSeconds", DefaultIntervalSeconds));
             m_extractMode = valuesDictionary.GetValue("ExtractMode", HopperExtractMode.OutputPreferred);
             m_enabled = valuesDictionary.GetValue("Enabled", DefaultEnabledForCurrentVariant());
@@ -68,15 +71,17 @@ namespace Logistics {
             if (!TryReadCell(out int value, out Point3 cell)) {
                 return;
             }
-            if (LogisticsHopperBlock.GetVariant(value) != LogisticsHopperVariant.Output) {
-                return;
-            }
             double now = m_subsystemTime.GameTime;
             if (now < m_nextFireTime) {
                 return;
             }
             m_nextFireTime = now + m_intervalSeconds;
-            TryDischarge(value, cell);
+            if (LogisticsHopperBlock.GetVariant(value) == LogisticsHopperVariant.Output) {
+                TryDischarge(value, cell);
+            }
+            else {
+                TryIntakeFromBelt(value, cell);
+            }
         }
 
         /// <summary>受料：尝试吞掉落物。成功则改 worldItem。</summary>
@@ -132,10 +137,21 @@ namespace Logistics {
                 hasInput ? "TargetMachine" : "TargetChest");
         }
 
+        /// <summary>对话框状态：大口一侧是否对着输送带。</summary>
+        public string DescribeMouthStatus() {
+            if (!TryReadCell(out int value, out Point3 cell)) {
+                return LanguageControl.GetContentWidgets(nameof(HopperDialog), "Gone");
+            }
+            return LanguageControl.GetContentWidgets(
+                nameof(HopperDialog),
+                TryGetMouthBeltCell(value, cell, out _) ? "MouthBelt" : "MouthOpen");
+        }
+
         void TryDischarge(int value, Point3 cell) {
             if (!TryGetAttachedInventory(value, cell, out Entity sourceEntity, out IInventory sourceInventory)) {
                 return;
             }
+            bool ontoBelt = TryGetMouthBeltCell(value, cell, out Point3 mouthCell);
             foreach (int slotIndex in EnumerateExtractSlots(sourceEntity, sourceInventory)) {
                 if (slotIndex < 0 || slotIndex >= sourceInventory.SlotsCount) {
                     continue;
@@ -152,10 +168,44 @@ namespace Logistics {
                 if (take <= 0) {
                     continue;
                 }
+                if (ontoBelt) {
+                    // 带上没位置就本次不出货：把货留在源容器里排队，而不是在带边堆掉落物
+                    if (!m_subsystemBeltGroups.TryInsertItemFrom(
+                            mouthCell,
+                            new Vector3(cell) + new Vector3(0.5f),
+                            itemValue,
+                            take)) {
+                        return;
+                    }
+                    sourceInventory.RemoveSlotItems(slotIndex, take);
+                    return;
+                }
                 sourceInventory.RemoveSlotItems(slotIndex, take);
                 EjectPickable(value, cell, itemValue, take);
                 return;
             }
+        }
+
+        /// <summary>受料：从大口侧输送带取一件，塞进窄口贴合的容器；塞不下就不取。</summary>
+        void TryIntakeFromBelt(int value, Point3 cell) {
+            if (!TryGetMouthBeltCell(value, cell, out Point3 mouthCell)
+                || !TryGetAttachedInventory(value, cell, out Entity destEntity, out IInventory destInventory)
+                || !m_subsystemBeltGroups.TryPeekItem(mouthCell, out int itemValue, out int count)) {
+                return;
+            }
+            if (!TryInsertIntoAttached(destEntity, destInventory, itemValue, count, out int remain)) {
+                return;
+            }
+            int moved = count - remain;
+            if (moved > 0) {
+                m_subsystemBeltGroups.RemoveItem(mouthCell, moved);
+            }
+        }
+
+        /// <summary>大口侧邻格是否为已编组的输送带。</summary>
+        bool TryGetMouthBeltCell(int value, Point3 cell, out Point3 mouthCell) {
+            mouthCell = cell + CellFace.FaceToPoint3(LogisticsHopperBlock.GetFacing(value));
+            return m_subsystemBeltGroups.TryGetAt(mouthCell, out _);
         }
 
         static int GetTransferCount(Entity sourceEntity, int slotIndex, IInventory sourceInventory) {

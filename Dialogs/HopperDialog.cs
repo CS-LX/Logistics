@@ -83,7 +83,6 @@ namespace Logistics {
                 HorizontalAlignment = WidgetAlignment.Center
             };
             m_dischargeControls.Children.Add(m_modeButton);
-            m_dischargeControls.Children.Add(intervalRow);
             m_closeButton = new BevelledButtonWidget {
                 Size = new Vector2(160f, 60f),
                 Margin = new Vector2(20f, 8f),
@@ -104,6 +103,7 @@ namespace Logistics {
             panel.Children.Add(titleRow);
             panel.Children.Add(m_statusLabel);
             panel.Children.Add(m_dischargeControls);
+            panel.Children.Add(intervalRow);
             panel.Children.Add(closeRow);
             Children.Add(new GradientBackdropWidget());
             Children.Add(panel);
@@ -128,13 +128,11 @@ namespace Logistics {
             if (m_enabledCheckbox.IsClicked) {
                 m_hopper.Enabled = !m_hopper.Enabled;
             }
-            if (m_isDischarge) {
-                if (m_modeButton.IsClicked) {
-                    m_hopper.ExtractMode = NextMode(m_hopper.ExtractMode);
-                }
-                if (m_intervalSlider.IsSliding || MathF.Abs(m_intervalSlider.Value - m_hopper.IntervalSeconds) > 0.001f) {
-                    m_hopper.IntervalSeconds = m_intervalSlider.Value;
-                }
+            if (m_isDischarge && m_modeButton.IsClicked) {
+                m_hopper.ExtractMode = NextMode(m_hopper.ExtractMode);
+            }
+            if (m_intervalSlider.IsSliding || MathF.Abs(m_intervalSlider.Value - m_hopper.IntervalSeconds) > 0.001f) {
+                m_hopper.IntervalSeconds = m_intervalSlider.Value;
             }
             RefreshAll(forceSlider: false);
         }
@@ -158,23 +156,23 @@ namespace Logistics {
                 m_isDischarge ? "TitleOutput" : "TitleInput");
             m_dischargeControls.IsVisible = m_isDischarge;
             m_modeButton.IsEnabled = m_isDischarge;
-            m_intervalSlider.IsEnabled = m_isDischarge;
+            m_intervalSlider.IsEnabled = true;
+            if (forceSlider || !m_intervalSlider.IsSliding) {
+                m_intervalSlider.Value = m_hopper.IntervalSeconds;
+            }
+            m_intervalValueLabel.Text = string.Format(
+                LanguageControl.GetContentWidgets(nameof(HopperDialog), "IntervalValue"),
+                m_hopper.IntervalSeconds);
             if (m_isDischarge) {
                 m_modeButton.Text = ModeLabel(m_hopper.ExtractMode);
-                if (forceSlider || !m_intervalSlider.IsSliding) {
-                    m_intervalSlider.Value = m_hopper.IntervalSeconds;
-                }
-                m_intervalValueLabel.Text = string.Format(
-                    LanguageControl.GetContentWidgets(nameof(HopperDialog), "IntervalValue"),
-                    m_hopper.IntervalSeconds);
-                m_statusLabel.Text = string.Format(
+            }
+            string primary = m_isDischarge
+                ? string.Format(
                     LanguageControl.GetContentWidgets(nameof(HopperDialog), "StatusOutput"),
                     ModeLabel(m_hopper.ExtractMode),
-                    m_hopper.IntervalSeconds);
-            }
-            else {
-                m_statusLabel.Text = m_hopper.DescribeAttachedStatus();
-            }
+                    m_hopper.IntervalSeconds)
+                : m_hopper.DescribeAttachedStatus();
+            m_statusLabel.Text = $"{primary}\n{m_hopper.DescribeMouthStatus()}";
         }
 
         static HopperExtractMode NextMode(HopperExtractMode mode) => mode switch {

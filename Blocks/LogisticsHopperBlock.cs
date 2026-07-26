@@ -151,6 +151,42 @@ namespace Logistics {
                 null,
                 null,
                 geometry.GetGeometry(LogisticsLoader.BlockTexture).SubsetAlphaTest);
+            GenerateMouthBeltVertices(generator, geometry, value, x, y, z);
+        }
+
+        /// <summary>
+        /// 大口正对同轴输送带时，在斗口里画一段同向滚动的带，让外面那条看起来伸进斗里。
+        /// 只跟随外部带的方向与运转（不改带子逻辑，也不参与碰撞）。
+        /// </summary>
+        static void GenerateMouthBeltVertices(
+            BlockGeometryGenerator generator,
+            TerrainGeometry geometry,
+            int value,
+            int x,
+            int y,
+            int z
+        ) {
+            Point3 offset = CellFace.FaceToPoint3(GetFacing(value));
+            if (offset.Y != 0) {
+                return;
+            }
+            int mouthValue = generator.Terrain.GetCellValue(x + offset.X, y, z + offset.Z);
+            if (Terrain.ExtractContents(mouthValue) != ConveyerBeltBlock.Index) {
+                return;
+            }
+            int beltData = Terrain.ExtractData(mouthValue);
+            int rotation = ConveyerBeltBlock.GetRotation(beltData);
+            // 只在带子走向与大口同轴（端点对接）时延伸；侧向贴靠时两条带并不相接
+            if (((rotation & 1) == 0) != (offset.Z != 0)) {
+                return;
+            }
+            ConveyerBeltDrawingManager.GenerateBeltVertices(
+                generator,
+                geometry,
+                x,
+                y,
+                z,
+                ConveyerBeltBlock.WithGeometry(beltData, shape: 0, rotation));
         }
 
         public override void DrawBlock(

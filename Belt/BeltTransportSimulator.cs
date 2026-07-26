@@ -82,7 +82,7 @@ namespace Logistics {
                 if (!m_registry.TryGetAt(cell, out BeltGroup group) || !m_power.IsGroupRunning(group)) {
                     continue;
                 }
-                if (!BeltPath.TryGetMemberCenterBeltPosition(group, cell, m_subsystemTerrain, out float center, out _)) {
+                if (!BeltPath.TryGetMemberCenterBeltPosition(group, cell, m_subsystemTerrain, out float center)) {
                     continue;
                 }
                 if (!BeltPath.TryGetWorldPose(group, center, 0f, m_subsystemTerrain, out _, out Vector3 tangent)) {
@@ -179,11 +179,11 @@ namespace Logistics {
                 if (exitAlongZ == nAlongZ) {
                     continue;
                 }
-                if (!BeltPath.TryGetMemberCenterBeltPosition(target, n, m_subsystemTerrain, out float entryCenter, out _)) {
+                if (!BeltPath.TryGetMemberCenterBeltPosition(target, n, m_subsystemTerrain, out float entryCenter)) {
                     continue;
                 }
                 float targetLength = BeltPath.TotalLength(target, m_subsystemTerrain);
-                const float inset = 0.12f;
+                const float inset = BeltSegmentInventory.EndInset;
                 float entryPos = target.Sign >= 0
                     ? MathF.Min(entryCenter, MathF.Max(0f, targetLength - inset))
                     : MathF.Max(entryCenter, MathF.Min(targetLength, inset));
