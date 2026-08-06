@@ -12,7 +12,7 @@ namespace Logistics {
     /// 外观（网格与世界几何）在 <see cref="ConveyerBeltDrawingManager"/>，本类只管数据契约、碰撞与放置。
     /// </summary>
     public class ConveyerBeltBlock : Block, IPreferPlacement {
-        public const int Index = 553;
+        public static int Index = 553;
         /// <summary>data 变体数（powered × reverse × shape × rotation）；网格与碰撞盒按此索引缓存。</summary>
         public const int DataVariantCount = 32;
 
